@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
+class HomePage extends StatefulWidget {
+  HomePage({Key key}) : super(key: key);
 
   // This widget is the home page of your application. It is stateful, meaning
   // that it has a State object (defined below) that contains fields that affect
@@ -12,13 +12,12 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-  final String title;
 
   @override
-  _MyHomePageState createState() => new _MyHomePageState();
+  _HomePageState createState() => new _HomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _HomePageState extends State<HomePage> {
 
   final String pageTitle = 'GameLog';
   final String welcomeText = 'Welcome';
@@ -33,15 +32,7 @@ class _MyHomePageState extends State<MyHomePage> {
               Center(child:Text(pageTitle, style: Theme.of(context).textTheme.title))
             ],
           )
-        ),
-      bottomNavigationBar: BottomNavigationBar(
-          items: [
-            BottomNavigationBarItem(icon: Icon(Icons.settings), title: Text('Settings')),
-            BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
-            BottomNavigationBarItem(icon: Icon(Icons.view_list), title: Text('Logs'))
-          ],
-          iconSize: 30.0,
-      ),
+        )
     );
   }
 }

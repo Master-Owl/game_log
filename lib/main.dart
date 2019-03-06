@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import './screens/home.dart';
+import 'package:game_log/screens/home-page.dart';
+import 'package:game_log/screens/logs-page.dart';
+import 'package:game_log/screens/settings-page.dart';
 
 void main() => runApp(new MyApp());
 
@@ -46,7 +48,57 @@ class MyApp extends StatelessWidget {
             title: TextStyle(fontSize: 36.0, color: Colors.black54, fontWeight: FontWeight.w300)
         )
       ),
-      home: new MyHomePage(title: 'GameLog'),
+      home: MainApp()
     );
+  }
+}
+
+class MainApp extends StatefulWidget {
+  MainApp({Key key}) : super(key: key);
+
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  int _pageIdx;
+  Widget _currentPage;
+  List<Widget> _mainPages;
+  List<BottomNavigationBarItem> _items = [
+    BottomNavigationBarItem(icon: Icon(Icons.settings), title: Text('Settings'),),
+    BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
+    BottomNavigationBarItem(icon: Icon(Icons.view_list), title: Text('Logs'))
+  ];
+
+  @override
+  void initState() {
+    _mainPages = [
+      SettingsPage(),
+      HomePage(),
+      LogsPage()
+    ];
+
+    _pageIdx = 1;
+    _currentPage = _mainPages[_pageIdx];
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _currentPage,
+      bottomNavigationBar: BottomNavigationBar(
+        items: _items,
+        currentIndex: _pageIdx,
+        onTap: _onTap,
+      )
+    );
+  }
+
+  void _onTap(int idx) {
+    setState(() {
+      _pageIdx = idx;
+      _currentPage = _mainPages[idx];
+    });
   }
 }
