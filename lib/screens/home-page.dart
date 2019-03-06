@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
+import 'package:game_log/screens/edit-log.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -21,18 +22,20 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   final String pageTitle = 'GameLog';
+  BuildContext _buildContext;
 
   @override
   Widget build(BuildContext context) {
+    _buildContext = context;
     return Scaffold(
       body: Container(
-          padding: const EdgeInsets.fromLTRB(16.0,30.0,16.0,16.0),
+          padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,0),
           child: Column(
             children: [
               Center(
                   child: Text(
                       pageTitle,
-                      style: Theme.of(context).textTheme.title
+                      style: Theme.of(context).textTheme.headline
                   )
               ),
               Spacer(),
@@ -57,6 +60,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _createLog() {
-    tabIdxController.sink.add(2);
+    tabIdxController.sink.add(tabs['logs']);
+    Navigator.push(_buildContext, MaterialPageRoute(builder: (context) => EditLogPage()));
   }
 }

@@ -50,7 +50,8 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
             stream: tabIdxController.stream,
             initialData: _tabIdx,
             builder: (BuildContext context, AsyncSnapshot<int> newIdx){
-              _tabIdx = newIdx.data;
+              // Put this inside a streambuilder so it forces re-render
+              // on new item added to stream
               return BottomNavigationBar(
                   items: _items,
                   currentIndex: _tabIdx,

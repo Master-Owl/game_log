@@ -42,8 +42,9 @@ class MyApp extends StatelessWidget {
             }),
         fontFamily: 'Robotto',
         textTheme: TextTheme(
-            headline: TextStyle(fontSize: 64.0, color: Colors.black87),
-            title: TextStyle(fontSize: 36.0, color: Colors.black54, fontWeight: FontWeight.w300)
+            headline: TextStyle(fontSize: 32.0, color: Colors.black54, fontWeight: FontWeight.w300),
+            title: TextStyle(fontSize: 26.0, color: Colors.black87, fontWeight: FontWeight.w400),
+            body1: TextStyle(fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.w400),
         )
       ),
       home: MainAppRoutes()
