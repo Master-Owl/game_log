@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:game_log/data/globals.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -20,7 +21,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   final String pageTitle = 'GameLog';
-  final String welcomeText = 'Welcome';
 
   @override
   Widget build(BuildContext context) {
@@ -29,10 +29,34 @@ class _HomePageState extends State<HomePage> {
           padding: const EdgeInsets.fromLTRB(16.0,30.0,16.0,16.0),
           child: Column(
             children: [
-              Center(child:Text(pageTitle, style: Theme.of(context).textTheme.title))
+              Center(
+                  child: Text(
+                      pageTitle,
+                      style: Theme.of(context).textTheme.title
+                  )
+              ),
+              Spacer(),
+              RaisedButton(
+                onPressed: _createLog,
+                child: Padding(
+                    padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+                    child: Text('Create Log',
+                      style: TextStyle(
+                        fontWeight: FontWeight.w300,
+                        fontSize: 28.0
+                      )
+                  )
+                ),
+                color: Theme.of(context).primaryColor,
+              ),
+              Spacer()
             ],
           )
         )
     );
+  }
+
+  void _createLog() {
+    tabIdxController.sink.add(2);
   }
 }
