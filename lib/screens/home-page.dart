@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
-import 'package:game_log/screens/edit-log.dart';
+import 'package:game_log/screens/edit-log-page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -43,7 +43,8 @@ class _HomePageState extends State<HomePage> {
                 onPressed: _createLog,
                 child: Padding(
                     padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
-                    child: Text('Create Log',
+                    child: Text(
+                      'Create Log',
                       style: TextStyle(
                         fontWeight: FontWeight.w300,
                         fontSize: 28.0

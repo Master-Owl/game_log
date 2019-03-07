@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/globals.dart';
+import 'package:game_log/screens/player-edit-page.dart';
 
 class PlayerList extends StatefulWidget {
   PlayerList({ Key key, this.gameplay }) : super(key: key);
@@ -22,7 +24,7 @@ class _PlayerListState extends State<PlayerList> {
   void initState() {
     if (gameplay == null) gameplay = GamePlay();
 
-    players = gameplay.players;
+    players = List<Player>.from(gameplay.players); // create copy of players until saved
     super.initState();
   }
 
@@ -66,7 +68,7 @@ class _PlayerListState extends State<PlayerList> {
             IconButton(
               icon: Icon(Icons.add, color: accent),
               tooltip: 'Add Player',
-              onPressed: () => {}, // add player
+              onPressed: addPerson, // add player
             )
           ]
         ),
@@ -114,6 +116,75 @@ class _PlayerListState extends State<PlayerList> {
     }
     
     return tiles;
+  }
+
+
+  Future<void> addPerson() async {
+    return await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text('Select Player'),
+          children: buildDialogPlayerOptions(),          
+        );
+      }
+    );
+  }
+
+  List<Widget> buildDialogPlayerOptions() {
+    List<Widget> options = [];
+
+    for (Player player in mockPlayerData) { // need to change this eventually to retrieve all players
+      if (players.contains(player)) continue;
+      options.add(
+        SimpleDialogOption(
+          child: Row(
+            children: [
+              Icon(Icons.person, color: player.color),
+              Padding(
+                padding: EdgeInsets.only(left: 16.0),
+                child: Text(player.name),
+              )
+            ]
+          ),
+          onPressed: () {
+            setState(() {
+              players.add(player);
+            });
+            Navigator.pop(context);
+          }
+        )
+      );
+    }
+    
+    options.add(
+      SimpleDialogOption(
+        child: Row(
+          children: [
+            Icon(Icons.add_circle_outline, color: Theme.of(context).accentColor),
+            Padding(
+              padding: EdgeInsets.only(left: 16.0),
+              child: Text('Create New Player'),
+            )
+          ]
+        ),
+        onPressed: () async {
+          Navigator.pop(context); // remove popup
+
+          // wait for new player created
+          Player newPlayer = await Navigator.push(
+            context, 
+            MaterialPageRoute<Player>(
+              builder: (context) => PlayerEditPage()
+            )
+          );
+          
+          if (newPlayer != null) setState(() { players.add(newPlayer); });          
+        }
+      )
+    );
+
+    return options;
   }
 
 

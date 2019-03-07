@@ -3,7 +3,6 @@ import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/player-list.dart';
-import 'package:game_log/data/player.dart';
 
 class EditLogPage extends StatefulWidget {
   EditLogPage({Key key, this.gamePlay }) : super(key: key);
@@ -33,24 +32,18 @@ class _EditLogState extends State<EditLogPage> {
 
   @override
   Widget build(BuildContext context) {
-    GamePlay gp = GamePlay(players: mockPlayerData);
-    
+    gamePlay = GamePlay(players: mockPlayerData);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle, style: Theme.of(context).textTheme.title),
         actions: [
           IconButton(
-            icon: Icon(Icons.block),
-            tooltip: 'Cancel',
-            onPressed: () => { Navigator.pop(context) }
-          ),
-          IconButton(
             icon: Icon(Icons.save),
             tooltip: 'Save',
             onPressed: () => { Navigator.pop(context) }
           )
-        ],
-        automaticallyImplyLeading: false,
+        ]
       ),
       body: Padding(
         padding: EdgeInsets.fromLTRB(lrPadding, 24.0, lrPadding, 16.0),
@@ -61,9 +54,7 @@ class _EditLogState extends State<EditLogPage> {
               onChanged: (str) => { gamePlay.game.name = str },
               label: 'Game Title',
             ),
-            PlayerList(
-              gameplay: gp
-            ),
+            PlayerList(gameplay: gamePlay)
           ],
         )
       )
