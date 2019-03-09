@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
+import 'package:flutter_colorpicker/block_picker.dart';
 
 class PlayerEditPage extends StatefulWidget {
   PlayerEditPage({Key key, this.player}) : super(key: key);
@@ -79,7 +81,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                             BorderRadius.all(Radius.circular(16.0))),
                     child: Text('Change Player Color',
                         style: TextStyle(fontWeight: FontWeight.w400)),
-                    onPressed: () => {},
+                    onPressed: pickColor,
                   ),
                 ])
               ),
@@ -87,5 +89,39 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
           ),
         )
       );
+  }
+
+  Future<void> pickColor() async {
+    Color oldColor = color;
+    return await showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) => AlertDialog(
+        title: const Text('Pick a color!'),
+        content: SingleChildScrollView(
+          child: BlockPicker(
+            pickerColor: color,
+            onColorChanged: (newColor) => setState(() => { color = newColor }),
+          ),
+        ),
+        actions: [
+          FlatButton(
+            child: Text('Cancel'),
+            textColor: Theme.of(context).errorColor,
+            onPressed: () {
+              setState(() => { color = oldColor });
+              Navigator.of(context).pop();
+            },
+          ),
+          FlatButton(
+            child: Text('Done'),
+            textColor: Theme.of(context).accentColor,
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+        ],
+      ),
+    );
   }
 }
