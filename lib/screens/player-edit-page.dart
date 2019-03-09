@@ -4,6 +4,7 @@ import 'package:game_log/data/player.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:flutter_colorpicker/block_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PlayerEditPage extends StatefulWidget {
   PlayerEditPage({Key key, this.player}) : super(key: key);
@@ -17,7 +18,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   _PlayerEditPageState(this.player);
 
   Player player;
-  String name;
+  String name = '';
   Color color;
   bool newPlayer;
   String appBarTitle;
@@ -25,10 +26,22 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   @override
   void initState() {
     newPlayer = player == null;
-    if (newPlayer) player = Player(name: 'Anonymous', color: Colors.black12);
+    
+    if (newPlayer) {
+      player = Player(name: 'Anonymous', color: Colors.black12); 
+    } else {
+      Firestore.instance
+        .collection('players')
+        .document(player.docId)
+        .get()
+        .then((snapshot) => {
+          setState(() {
+            player.name = name = snapshot.data['name'];
+            player.color = color = Color(snapshot.data['color']);
+          })
+        });
+    }
 
-    name = player.name;
-    color = player.color;
     appBarTitle = newPlayer ? 'Create New Player' : 'Edit Player';
     super.initState();
   }
@@ -45,9 +58,10 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                 onPressed: () {
                   player.name = name == '' ? 'Anonymous' : name;
                   player.color = color == null ? Colors.black : color;
-                  Navigator.pop(context, player);
+                  if (player.name != 'Anonymous')
+                    updatePlayerDB(player);
 
-                  // Also save to db
+                  Navigator.pop(context, player);
                 })
           ],
         ),
@@ -58,7 +72,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
               ListTile(
                 leading: CircleAvatar(
                   child: Text(
-                    name.substring(0, 1),
+                    getPlayerInitials(),
                     style: TextStyle(fontSize: 75.0, color: defaultGray),
                   ),
                   backgroundColor: color,
@@ -89,6 +103,17 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
           ),
         )
       );
+  }
+
+  String getPlayerInitials() {
+    if (name == '') return '';
+    List<String> names = name.split(' ');
+    String initials = '';
+    names.forEach((namePart) {
+      if (namePart.length > 0)
+        initials += namePart.substring(0,1).toUpperCase();
+    });
+    return initials;
   }
 
   Future<void> pickColor() async {
@@ -123,5 +148,15 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
         ],
       ),
     );
+  }
+
+  void updatePlayerDB(Player p) {
+    if (p.docId == '' || p.docId == null) {
+      Firestore.instance.collection('players').document()
+              .setData({ 'name': p.name, 'color': p.color.value });
+    } else {
+      Firestore.instance.collection('players').document(p.docId)
+              .updateData({ 'name': p.name, 'color': p.color.value });        
+    }
   }
 }

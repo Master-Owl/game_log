@@ -32,7 +32,7 @@ class _EditLogState extends State<EditLogPage> {
 
   @override
   Widget build(BuildContext context) {
-    gamePlay = GamePlay(players: mockPlayerData);
+    // gamePlay = GamePlay(players: mockPlayerData);
 
     return Scaffold(
       appBar: AppBar(

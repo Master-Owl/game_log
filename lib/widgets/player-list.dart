@@ -19,23 +19,58 @@ class _PlayerListState extends State<PlayerList> {
 
   GamePlay gameplay;
   List<Player> players;
+  List<Player> allSavedPlayers;
 
   @override
   void initState() {
     if (gameplay == null) gameplay = GamePlay();
 
     players = List<Player>.from(gameplay.players); // create copy of players until saved
+    allSavedPlayers = new List<Player>();
     super.initState();
   }
 
+  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
   @override
   Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot>(
+      stream: Firestore.instance.collection('players').snapshots(),
+      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.hasError)
+          return mainView(context, false, null, 'Error: ${snapshot.error}');
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting: return mainView(context, true, null, '');
+          default: return mainView(context, false, snapshot, '');
+        }
+      },
+    );
+  }
+
+  Widget mainView(BuildContext context, bool waiting, AsyncSnapshot<QuerySnapshot> snapshot, String err) {
     double listTileHeight = 50.0;
     double minHeight = 200.0;
     Color primary = Theme.of(context).primaryColor;
     Color accent = Theme.of(context).accentColor;
 
-    Widget content = players.length > 0 ? 
+    // Set all players
+    if (snapshot != null) {
+      allSavedPlayers.clear();
+      snapshot.data.documents.forEach((doc) {
+        Player p = Player(name: doc.data['name'], color: Color(doc.data['color']), docId: doc.documentID);
+        allSavedPlayers.add(p);
+
+        // For testing w/ mock data
+        for (int i = 0; i < players.length; ++i) {
+          if (players[i].name == p.name && players[i].color == p.color) {
+            players[i] = p;
+            break;
+          }
+        }
+      });
+    }
+
+    // Build player list
+    Widget content = players.length > 0 && !waiting ? 
       ListView(
         shrinkWrap: true,
         itemExtent: listTileHeight,
@@ -43,7 +78,11 @@ class _PlayerListState extends State<PlayerList> {
       ) :
       Center(
         child: Text(
-          'No Players Added Yet',
+          err == '' ? 
+            waiting ? 
+              'Loading...' : 
+              'No Players Added Yet' :
+            err,
           style: TextStyle(
             color: defaultGray,
             fontSize: 20.0,
@@ -52,38 +91,39 @@ class _PlayerListState extends State<PlayerList> {
         )
       );
 
+    // Layout the list
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Text(
-              'Players',
-              style: TextStyle(
-                color: defaultGray,
-                fontSize: 24.0
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Text(
+                'Players',
+                style: TextStyle(
+                  color: defaultGray,
+                  fontSize: 24.0
+                ),
+              ),
+              Spacer(),
+              IconButton(
+                icon: Icon(Icons.add, color: accent),
+                tooltip: 'Add Player',
+                onPressed: waiting && err != null ? null : addPerson, // add player
+              )
+            ]
+          ),
+          Container(
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(color: defaultGray),
+                bottom: BorderSide(color: defaultGray),
               ),
             ),
-            Spacer(),
-            IconButton(
-              icon: Icon(Icons.add, color: accent),
-              tooltip: 'Add Player',
-              onPressed: addPerson, // add player
-            )
-          ]
-        ),
-        Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: BorderSide(color: defaultGray),
-              bottom: BorderSide(color: defaultGray),
-            ),
-          ),
-          height: minHeight,
-          child: content
-        )
-      ]
-    );
+            height: minHeight,
+            child: content
+          )
+        ]
+      );
   }
 
   List<Widget> buildListTiles() {
@@ -110,8 +150,7 @@ class _PlayerListState extends State<PlayerList> {
               ),
             ]
           ),
-          onTap: () async {
-            // wait for new player created
+          onTap: () async {           
             Player changedPlayer = await Navigator.push(
               context, 
               MaterialPageRoute<Player>(
@@ -119,9 +158,9 @@ class _PlayerListState extends State<PlayerList> {
               )
             );
             
-            if (changedPlayer != null) {
+            if (changedPlayer != null && changedPlayer != player) {
               setState(() {
-                
+                players[players.indexOf(player)] = changedPlayer;
               });
             }
           }   
@@ -131,7 +170,6 @@ class _PlayerListState extends State<PlayerList> {
     
     return tiles;
   }
-
 
   Future<void> addPerson() async {
     return await showDialog(
@@ -148,7 +186,7 @@ class _PlayerListState extends State<PlayerList> {
   List<Widget> buildDialogPlayerOptions() {
     List<Widget> options = [];
 
-    for (Player player in mockPlayerData) { // need to change this eventually to retrieve all players
+    for (Player player in allSavedPlayers) {
       if (players.contains(player)) continue;
       options.add(
         SimpleDialogOption(
@@ -200,29 +238,4 @@ class _PlayerListState extends State<PlayerList> {
 
     return options;
   }
-
-
-  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
-  // @override
-  // Widget build(BuildContext context) {
-  //   return StreamBuilder<QuerySnapshot>(
-  //     stream: Firestore.instance.collection('players').snapshots(),
-  //     builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-  //       if (snapshot.hasError)
-  //         return new Text('Error: ${snapshot.error}');
-  //       switch (snapshot.connectionState) {
-  //         case ConnectionState.waiting: return new Text('Loading...');
-  //         default:
-  //           return new ListView(
-  //             children: snapshot.data.documents.map((DocumentSnapshot document) {
-  //               return new ListTile(
-  //                 title: new Text(document['title']),
-  //                 subtitle: new Text(document['author']),
-  //               );
-  //             }).toList(),
-  //           );
-  //       }
-  //     },
-  //   );
-  // }
 }
