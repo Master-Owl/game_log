@@ -29,34 +29,34 @@ class _HomePageState extends State<HomePage> {
     _buildContext = context;
     return Scaffold(
       body: Container(
-          padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,0),
-          child: Column(
-            children: [
-              Center(
+        padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,0),
+        child: Column(
+          children: [
+            Center(
+                child: Text(
+                  pageTitle,
+                  style: Theme.of(context).textTheme.headline
+                )
+            ),
+            Spacer(),
+            RaisedButton(
+              onPressed: _createLog,
+              child: Padding(
+                  padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
                   child: Text(
-                      pageTitle,
-                      style: Theme.of(context).textTheme.headline
-                  )
+                    'Create Log',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w300,
+                      fontSize: 28.0
+                    )
+                )
               ),
-              Spacer(),
-              RaisedButton(
-                onPressed: _createLog,
-                child: Padding(
-                    padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
-                    child: Text(
-                      'Create Log',
-                      style: TextStyle(
-                        fontWeight: FontWeight.w300,
-                        fontSize: 28.0
-                      )
-                  )
-                ),
-                color: Theme.of(context).primaryColor,
-              ),
-              Spacer()
-            ],
-          )
+              color: Theme.of(context).primaryColor,
+            ),
+            Spacer()
+          ],
         )
+      )
     );
   }
 

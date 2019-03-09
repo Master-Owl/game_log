@@ -110,7 +110,21 @@ class _PlayerListState extends State<PlayerList> {
               ),
             ]
           ),
-          onTap: () => {}, // go to player page
+          onTap: () async {
+            // wait for new player created
+            Player changedPlayer = await Navigator.push(
+              context, 
+              MaterialPageRoute<Player>(
+                builder: (context) => PlayerEditPage(player: player)
+              )
+            );
+            
+            if (changedPlayer != null) {
+              setState(() {
+                
+              });
+            }
+          }   
         )
       );
     }
