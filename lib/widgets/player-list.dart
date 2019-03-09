@@ -20,6 +20,7 @@ class _PlayerListState extends State<PlayerList> {
   GamePlay gameplay;
   List<Player> players;
   List<Player> allSavedPlayers;
+  bool fetchDB = true;
 
   @override
   void initState() {
@@ -33,20 +34,24 @@ class _PlayerListState extends State<PlayerList> {
   // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot>(
-      stream: Firestore.instance.collection('players').snapshots(),
-      builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-        if (snapshot.hasError)
-          return mainView(context, false, null, 'Error: ${snapshot.error}');
-        switch (snapshot.connectionState) {
-          case ConnectionState.waiting: return mainView(context, true, null, '');
-          default: return mainView(context, false, snapshot, '');
-        }
-      },
-    );
+    if (fetchDB) {
+      return StreamBuilder<QuerySnapshot>(
+        stream: Firestore.instance.collection('players').snapshots(),
+        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+          if (snapshot.hasError)
+            return mainView(context, false, null, 'Error: ${snapshot.error}');
+          switch (snapshot.connectionState) {
+            case ConnectionState.waiting: return mainView(context, true, null, '');
+            default: return mainView(context, false, snapshot, '');
+          }
+        },
+      );
+    }
+    return mainView(context, false, null, '');
   }
 
   Widget mainView(BuildContext context, bool waiting, AsyncSnapshot<QuerySnapshot> snapshot, String err) {
+    fetchDB = false;
     double listTileHeight = 50.0;
     double minHeight = 200.0;
     Color primary = Theme.of(context).primaryColor;
@@ -60,12 +65,12 @@ class _PlayerListState extends State<PlayerList> {
         allSavedPlayers.add(p);
 
         // For testing w/ mock data
-        for (int i = 0; i < players.length; ++i) {
-          if (players[i].name == p.name && players[i].color == p.color) {
-            players[i] = p;
-            break;
-          }
-        }
+        // for (int i = 0; i < players.length; ++i) {
+        //   if (players[i].name == p.name && players[i].color == p.color) {
+        //     players[i] = p;
+        //     break;
+        //   }
+        // }
       });
     }
 
@@ -161,6 +166,7 @@ class _PlayerListState extends State<PlayerList> {
             if (changedPlayer != null && changedPlayer != player) {
               setState(() {
                 players[players.indexOf(player)] = changedPlayer;
+                fetchDB = true;
               });
             }
           }   
@@ -231,7 +237,10 @@ class _PlayerListState extends State<PlayerList> {
             )
           );
           
-          if (newPlayer != null) setState(() { players.add(newPlayer); });          
+          if (newPlayer != null) setState(() {
+            players.add(newPlayer);
+            fetchDB = true;
+          });          
         }
       )
     );

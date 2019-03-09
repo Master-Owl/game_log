@@ -5,6 +5,7 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/utils/helper-funcs.dart';
 
 class PlayerEditPage extends StatefulWidget {
   PlayerEditPage({Key key, this.player}) : super(key: key);
@@ -40,6 +41,8 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
             player.color = color = Color(snapshot.data['color']);
           })
         });
+      name = player.name;
+      color = player.color;
     }
 
     appBarTitle = newPlayer ? 'Create New Player' : 'Edit Player';
@@ -73,7 +76,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                 leading: CircleAvatar(
                   child: Text(
                     getPlayerInitials(),
-                    style: TextStyle(fontSize: 75.0, color: defaultGray),
+                    style: TextStyle(fontSize: 75.0, color: determineTextColor(color)),
                   ),
                   backgroundColor: color,
                   maxRadius: 75.0,
@@ -94,7 +97,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                         borderRadius:
                             BorderRadius.all(Radius.circular(16.0))),
                     child: Text('Change Player Color',
-                        style: TextStyle(fontWeight: FontWeight.w400)),
+                        style: TextStyle(fontWeight: FontWeight.w400, color: determineTextColor(color))),
                     onPressed: pickColor,
                   ),
                 ])
