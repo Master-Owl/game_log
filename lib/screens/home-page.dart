@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/edit-log-page.dart';
+import 'package:game_log/screens/add-game-page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -20,13 +21,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   final String pageTitle = 'GameLog';
-  BuildContext _buildContext;
 
   @override
   Widget build(BuildContext context) {
-    _buildContext = context;
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,0),
@@ -38,22 +36,24 @@ class _HomePageState extends State<HomePage> {
                   style: Theme.of(context).textTheme.headline
                 )
             ),
-            Spacer(),
-            RaisedButton(
-              onPressed: _createLog,
-              child: Padding(
-                  padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
-                  child: Text(
-                    'Create Log',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w300,
-                      fontSize: 28.0
-                    )
-                )
-              ),
-              color: Theme.of(context).primaryColor,
+            Padding(
+              padding:EdgeInsets.only(top: 200.0),
+              child: RaisedButton(
+                onPressed: _createLog,
+                padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+                child: Text('Create Log', style: Theme.of(context).textTheme.button),
+                color: Theme.of(context).primaryColor,
+              )
             ),
-            Spacer()
+            Padding(
+              padding:EdgeInsets.only(top: 24.0),
+              child: RaisedButton(
+                onPressed: _addGame,
+                padding:  EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+                child: Text('Add Game', style: Theme.of(context).textTheme.button),
+                color: Theme.of(context).primaryColor,
+              )
+            ),
           ],
         )
       )
@@ -62,6 +62,10 @@ class _HomePageState extends State<HomePage> {
 
   void _createLog() {
     tabIdxController.sink.add(tabs['logs']);
-    Navigator.push(_buildContext, MaterialPageRoute(builder: (context) => EditLogPage()));
+    Navigator.push(context, MaterialPageRoute(builder: (context) => EditLogPage()));
+  }
+
+  void _addGame() {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => EditGamePage()));
   }
 }

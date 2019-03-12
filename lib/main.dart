@@ -11,6 +11,9 @@ class MyApp extends StatelessWidget {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(
       statusBarColor: Color(0x00FFFFFF)
     ));
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.portraitUp
+    ]);
     return new MaterialApp(
       title: 'GameLog',
       theme: new ThemeData(
@@ -45,6 +48,7 @@ class MyApp extends StatelessWidget {
             headline: TextStyle(fontSize: 32.0, color: Colors.black54, fontWeight: FontWeight.w300),
             title: TextStyle(fontSize: 26.0, color: Colors.black87, fontWeight: FontWeight.w400),
             body1: TextStyle(fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.w400),
+            button: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w300)
         )
       ),
       home: MainAppRoutes()
