@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:game_log/data/globals.dart';
 import 'routes.dart';
 
 void main() => runApp(new MyApp());
@@ -46,9 +47,10 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Robotto',
         textTheme: TextTheme(
             headline: TextStyle(fontSize: 32.0, color: Colors.black54, fontWeight: FontWeight.w300),
-            title: TextStyle(fontSize: 26.0, color: Colors.black87, fontWeight: FontWeight.w400),
-            body1: TextStyle(fontSize: 16.0, color: Colors.black87, fontWeight: FontWeight.w400),
-            button: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w300)
+            title: TextStyle(fontSize: 26.0, color: defaultGray, fontWeight: FontWeight.w400),
+            body1: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight: FontWeight.w400),
+            button: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w300),
+            subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
       ),
       home: MainAppRoutes()

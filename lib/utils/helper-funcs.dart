@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 Color determineTextColor(Color background) {
   int r = background.red;
@@ -31,4 +32,8 @@ String formatTimeDuration(Duration time) {
   int min = time.inMinutes % 60;
   String minStr = min == 0 ? '00' : min < 10 ? '0$min' : min.toString();
   return '${hr}h ${minStr}m';
+}
+
+DateTime readTimestamp(Timestamp stamp) {
+  return DateTime.fromMillisecondsSinceEpoch(stamp.millisecondsSinceEpoch);
 }

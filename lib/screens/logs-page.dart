@@ -1,19 +1,58 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/animation.dart';
 import 'package:game_log/data/globals.dart';
+import 'package:game_log/widgets/log-list.dart';
 
-class LogsPage extends StatelessWidget {
-  LogsPage({Key key}) : super(key: key);
+class LogsPage extends StatefulWidget {
+  LogsPage({Key key, this.subpages}) : super(key: key);
+
+  final List<Widget> subpages;
+
+  @override
+  _LogsPageState createState() => _LogsPageState(subpages);
+}
+
+class _LogsPageState extends State<LogsPage> with SingleTickerProviderStateMixin {
+  _LogsPageState(this.subpages);
+
+  List<Widget> subpages;
+  int _currentSubpageIdx;
+
+  AnimationController animController;
+  Animation<double> anim;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _currentSubpageIdx = 0;
+    animController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 400)
+    );
+
+    anim = Tween(begin: 0.0, end: 1.0).animate(animController);
+  }
 
   @override
   Widget build(BuildContext context) {
+    subpages = [              
+      LogList()
+    ];
+    animController.forward();
+    
     return Scaffold(
         body: Container(
-            padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,16.0),
+            padding: const EdgeInsets.only(top: headerPaddingTop),
             child: Column(
               children: [
-                Center(child:Text("Logs", style: Theme.of(context).textTheme.headline))
+                FadeTransition(
+                  opacity: anim,
+                  child: subpages[_currentSubpageIdx]
+                )
               ],
             )
-        )    );
+        )
+      );
   }
 }
