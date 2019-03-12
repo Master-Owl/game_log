@@ -61,7 +61,7 @@ class _PlayerListState extends State<PlayerList> {
     if (snapshot != null) {
       allSavedPlayers.clear();
       snapshot.data.documents.forEach((doc) {
-        Player p = Player(name: doc.data['name'], color: Color(doc.data['color']), docId: doc.documentID);
+        Player p = Player(name: doc.data['name'], color: Color(doc.data['color']), dbId: doc.documentID);
         allSavedPlayers.add(p);
 
         // For testing w/ mock data

@@ -33,7 +33,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
     } else {
       Firestore.instance
         .collection('players')
-        .document(player.docId)
+        .document(player.dbId)
         .get()
         .then((snapshot) => {
           setState(() {
@@ -154,11 +154,11 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   }
 
   void updatePlayerDB(Player p) {
-    if (p.docId == '' || p.docId == null) {
+    if (p.dbId == '' || p.dbId == null) {
       Firestore.instance.collection('players').document()
               .setData({ 'name': p.name, 'color': p.color.value });
     } else {
-      Firestore.instance.collection('players').document(p.docId)
+      Firestore.instance.collection('players').document(p.dbId)
               .updateData({ 'name': p.name, 'color': p.color.value });        
     }
   }

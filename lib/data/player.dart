@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 class Player {
-  Player({ this.name, this.color, this.docId });
+  Player({ this.name, this.color, this.dbId });
 
   String name;
   Color color;
-  String docId = '';
+  String dbId = '';
 
   bool operator ==(o) => o is Player &&
                   // o.name == name && 
                   // o.color.value == color.value && 
-                  o.docId == docId;
+                  o.dbId == dbId;
 
-  int get hashCode => 31 * /* name.hashCode + color.hashCode * 17 +*/ docId.hashCode * 3;
+  int get hashCode => 31 * /* name.hashCode + color.hashCode * 17 +*/ dbId.hashCode * 3;
 }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditGamePage extends StatefulWidget {
   EditGamePage({Key key, this.game }) : super(key: key);
@@ -34,6 +35,8 @@ class _EditGameState extends State<EditGamePage> {
   @override
   Widget build(BuildContext context) {
     TextStyle textStyle = TextStyle(color:defaultGray, fontSize: 26.0, fontWeight: FontWeight.w300);
+    List<DropdownMenuItem> winConditionItems = winConditions();
+    List<DropdownMenuItem> gameTypeItems = gameTypes();
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle, style: Theme.of(context).textTheme.title),
@@ -41,7 +44,7 @@ class _EditGameState extends State<EditGamePage> {
           IconButton(
             icon: Icon(Icons.save),
             tooltip: 'Save',
-            onPressed: () => { Navigator.pop(context) }
+            onPressed: saveGame
           )
         ]
       ),
@@ -64,20 +67,7 @@ class _EditGameState extends State<EditGamePage> {
                   DropdownButton(                
                     hint: Text('Win Condition'),
                     value: game.condition,
-                    items: [
-                      DropdownMenuItem(
-                        child: Text('Highest Score'),
-                        value: WinConditions.score_highest,
-                      ),
-                      DropdownMenuItem(
-                        child: Text('Lowest Score'),
-                        value: WinConditions.score_lowest,
-                      ),
-                      DropdownMenuItem(
-                        child: Text('Last Standing'),
-                        value: WinConditions.last_standing,
-                      )
-                    ],
+                    items: winConditionItems,
                     onChanged: (condition) => setState(() => { game.condition = condition }),
                   ),
                 ]
@@ -88,14 +78,14 @@ class _EditGameState extends State<EditGamePage> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text('Team Game', style: textStyle),
+                  Text('Game Type', style: textStyle),
                   Spacer(),
-                  Checkbox(
-                    value: game.teamGame,
-                    onChanged: (isTeamGame) => setState(() => { game.teamGame = isTeamGame }),
-                    activeColor: Theme.of(context).accentColor,
-                    checkColor: Colors.white,
-                  )
+                  DropdownButton(                
+                    hint: Text('Game Type'),
+                    value: game.type,
+                    items: gameTypeItems,
+                    onChanged: (type) => setState(() => { game.type = type }),
+                  ),
                 ]
               ),
             )
@@ -104,4 +94,75 @@ class _EditGameState extends State<EditGamePage> {
       )
     );
   }
+
+  List<DropdownMenuItem> winConditions() {
+    List<DropdownMenuItem> items = [];
+    for (WinConditions condition in WinConditions.values) {
+      items.add(DropdownMenuItem(
+        child: Text(winConditionString(condition)),
+        value: condition
+      ));
+    }
+    return items;
+  }
+
+  List<DropdownMenuItem> gameTypes() {
+    List<DropdownMenuItem> items = [];
+    for (GameType type in GameType.values) {
+      items.add(DropdownMenuItem(
+        child: Text(gameTypeString(type)),
+        value: type
+      ));
+    }
+    return items;
+  }
+
+  void saveGame() {
+    if (game.name != '') {
+      Map<String, dynamic> obj = { 
+        'bggid': game.bggId,
+        'name': game.name,
+        'type': game.gameTypeEnumString(),
+        'wincondition': game.winConditionEnumString(),
+      };
+
+      if (game.dbId == '' || game.dbId == null) Firestore.instance.collection('games').document().setData(obj);
+      else Firestore.instance.collection('games').document(game.dbId).updateData(obj);
+
+      Navigator.pop(context);
+    } else {
+      showDialog(
+        context: context,        
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Oh Dear...'),
+            content: SingleChildScrollView(
+              child: ListBody(
+                children: [
+                  Text('You need to fill out the game name field!'),
+                ],
+              ),
+            ),
+            actions: [
+              FlatButton(
+                padding: EdgeInsets.only(right: 18.0),
+                child: Text(
+                  'Oops!',
+                  style: TextStyle(
+                    color: Theme.of(context).errorColor,
+                    fontWeight: FontWeight.w400,
+                    fontSize: 18.0
+                  )
+                ),
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );    
+    }
+  }
+  
 }
