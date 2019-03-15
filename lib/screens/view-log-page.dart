@@ -4,6 +4,7 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
+import 'package:game_log/screens/edit-log-page.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key:key);
@@ -14,9 +15,9 @@ class ViewLogPage extends StatefulWidget {
 }
 
 class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMixin {
-  _ViewLogState(this.gameplay);
+  _ViewLogState(this.gamePlay);
 
-  final GamePlay gameplay;
+  GamePlay gamePlay;
   AnimationController animController;
   Animation<double> anim;
 
@@ -32,6 +33,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     TextStyle headline =TextStyle(fontWeight: FontWeight.w300, fontSize: 42.0, color:defaultGray);
     TextStyle title = TextStyle(fontWeight: FontWeight.w300, fontSize: 28.0, color: defaultGray);
     TextStyle datetime = TextStyle(fontWeight: FontWeight.w500, fontSize: 22.0, color: defaultGray);
+    String playersTitle = gamePlay.game.type == GameType.team ? 'Teams' : 'Players';
 
     animController.forward();
 
@@ -44,7 +46,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Text(gameplay.game.name, style: headline)
+                child: Text(gamePlay.game.name, style: headline)
               ),
               Padding(
                 padding:EdgeInsets.only(top: 36.0),
@@ -54,7 +56,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                     style: title,
                     children: [
                       TextSpan(
-                        text: formatDate(gameplay.playDate),
+                        text: formatDate(gamePlay.playDate),
                         style: datetime
                       )
                     ]
@@ -69,7 +71,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                     style: title,
                     children: [
                       TextSpan(
-                        text: formatTimeDuration(gameplay.playTime), 
+                        text: formatTimeDuration(gamePlay.playTime), 
                         style: datetime
                       ),
                     ],
@@ -78,13 +80,30 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
               ),
               Padding(
                 padding:EdgeInsets.only(top: 24.0),
-                child: Text('Players', style: title)
+                child: Text(playersTitle, style: title)
               ),
               ListView(
                 padding: EdgeInsets.only(left: 10.0, top: 6.0),
                 itemExtent: 45.0,
                 shrinkWrap: true,
                 children: buildPlayerList(),                
+              ),
+              Padding(
+                padding:EdgeInsets.only(top: 26.0),
+                child: Center(
+                  child: RaisedButton(
+                    child: Text('Edit Log', style: Theme.of(context).textTheme.button),
+                    padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
+                    color: Theme.of(context).accentColor,
+                    onPressed: () async {
+                      GamePlay changed = await Navigator.push(context, 
+                        MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gamePlay)));
+                      if (changed != null && changed != gamePlay) {
+                        setState(() => { gamePlay = changed });
+                      }
+                    },
+                  )
+                )
               )
             ]
           )
@@ -103,22 +122,21 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
       Colors.blue,
       Colors.yellow,
       Colors.orange,
-      Colors.pink
     ];
     colors.shuffle();
     Map<String, Color> teamColors = {};
 
-    for (Player player in gameplay.players) {
+    for (Player player in gamePlay.players) {
       Color tileColor;
       Widget appendedWidget = Container();
 
-      switch (gameplay.game.type) {
+      switch (gamePlay.game.type) {
         case GameType.standard:          
           tileColor = player.color;
           Widget badge = Icon(Icons.whatshot, color: Colors.yellow);          
           Widget pointText = RichText(
             text: TextSpan(
-              text: gameplay.scores[playerOrTeamIdx++].toString(),
+              text: gamePlay.scores[playerOrTeamIdx++].toString(),
               style: TextStyle(fontWeight: FontWeight.bold),
               children: [
                 TextSpan(
@@ -129,7 +147,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             ),
           );
 
-          if (gameplay.winners.contains(player)) {
+          if (gamePlay.winners.contains(player)) {
             appendedWidget = ListTile(
               leading: badge,
               title: pointText,
@@ -145,8 +163,8 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
 
         case GameType.team:
           String team = '';
-          for (String teamName in gameplay.teams.keys) {
-            if (gameplay.teams[teamName].contains(player)) {
+          for (String teamName in gamePlay.teams.keys) {            
+            if (gamePlay.teams[teamName].contains(player)) {
               team = teamName;
               break;
             }
@@ -167,7 +185,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             teamColors.putIfAbsent(team, () => tileColor);
           }
 
-          if (gameplay.winners.contains(player)) {
+          if (gamePlay.winners.contains(player)) {
             appendedWidget = Icon(Icons.whatshot, color: Colors.yellow);
           }
           break;

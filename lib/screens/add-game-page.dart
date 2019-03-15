@@ -126,8 +126,8 @@ class _EditGameState extends State<EditGamePage> {
         'wincondition': game.winConditionEnumString(),
       };
 
-      if (game.dbId == '' || game.dbId == null) Firestore.instance.collection('games').document().setData(obj);
-      else Firestore.instance.collection('games').document(game.dbId).updateData(obj);
+      if (game.dbRef == null) Firestore.instance.collection('games').document().setData(obj);
+      else Firestore.instance.collection('games').document(game.dbRef.documentID).updateData(obj);
 
       Navigator.pop(context);
     } else {

@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
 import 'package:game_log/data/gameplay.dart';
@@ -7,6 +6,7 @@ import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/player-list.dart';
 import 'package:game_log/utils/helper-funcs.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditLogPage extends StatefulWidget {
   EditLogPage({Key key, this.gamePlay }) : super(key: key);
@@ -46,7 +46,7 @@ class _EditLogState extends State<EditLogPage> {
           IconButton(
             icon: Icon(Icons.save),
             tooltip: 'Save',
-            onPressed: () => { Navigator.pop(context) }
+            onPressed: saveLog
           )
         ]
       ),
@@ -162,7 +162,15 @@ class _EditLogState extends State<EditLogPage> {
     }
   }
   
-  void saveLog() {}
+  void saveLog() {
+    if (gamePlay.dbRef == null) {
+      Firestore.instance.collection('gameplays').document()
+        .setData(gamePlay.serialize());
+    } else {
+      Firestore.instance.collection('gameplays').document(gamePlay.dbRef.documentID)
+        .setData(gamePlay.serialize());
+    }
 
-
+    Navigator.pop(context, gamePlay);
+  }
 }

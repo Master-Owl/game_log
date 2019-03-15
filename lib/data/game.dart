@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Game {
-  Game({ this.name, this.condition, this.type, this.bggId, this.dbId }) {
+  Game({ this.name, this.condition, this.type, this.bggId, this.dbRef }) {
     if (name == null) name = '';
     if (condition == null) condition = WinConditions.score_highest;
     if (type == null) type = GameType.standard;
@@ -15,7 +17,7 @@ class Game {
   WinConditions condition;
   GameType type;
   int bggId;
-  String dbId;
+  DocumentReference dbRef;
 }
 
 enum WinConditions {

@@ -33,7 +33,7 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
     } else {
       Firestore.instance
         .collection('players')
-        .document(player.dbId)
+        .document(player.dbRef.documentID)
         .get()
         .then((snapshot) => {
           setState(() {
@@ -97,7 +97,12 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
                         borderRadius:
                             BorderRadius.all(Radius.circular(16.0))),
                     child: Text('Change Player Color',
-                        style: TextStyle(fontWeight: FontWeight.w400, color: determineTextColor(color))),
+                        style: TextStyle(
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w400,
+                          color: determineTextColor(color)
+                        )
+                      ),
                     onPressed: pickColor,
                   ),
                 ])
@@ -134,7 +139,11 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
         ),
         actions: [
           FlatButton(
-            child: Text('Cancel'),
+            padding: EdgeInsets.only(right: 16.0),
+            child: Text('Cancel', style: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 24.0
+            )),
             textColor: Theme.of(context).errorColor,
             onPressed: () {
               setState(() => { color = oldColor });
@@ -142,7 +151,11 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
             },
           ),
           FlatButton(
-            child: Text('Done'),
+            padding:EdgeInsets.only(right: 26.0),
+            child: Text('Done', style: TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 24.0
+            )),
             textColor: Theme.of(context).accentColor,
             onPressed: () {
               Navigator.of(context).pop();
@@ -154,11 +167,11 @@ class _PlayerEditPageState extends State<PlayerEditPage> {
   }
 
   void updatePlayerDB(Player p) {
-    if (p.dbId == '' || p.dbId == null) {
+    if (p.dbRef == null) {
       Firestore.instance.collection('players').document()
               .setData({ 'name': p.name, 'color': p.color.value });
     } else {
-      Firestore.instance.collection('players').document(p.dbId)
+      Firestore.instance.collection('players').document(p.dbRef.documentID)
               .updateData({ 'name': p.name, 'color': p.color.value });        
     }
   }

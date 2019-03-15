@@ -179,18 +179,19 @@ class _LogListState extends State<LogList> {
             name: snapshot.data['name'],
             type: gameTypeFromString(snapshot.data['type']),
             condition: winConditionFromString(snapshot.data['wincondition']),
-            bggId: snapshot.data['bggid']
+            bggId: snapshot.data['bggid'],
+            dbRef: snapshot.reference
           );
         })
       );
 
       for (DocumentReference ref in playerRefs) {
         futures.add(
-          ref.get().then((snapshot) {         
+          ref.get().then((snapshot) {
             return snapshot.data != null ? Player(
               name: snapshot.data['name'],
               color: Color(snapshot.data['color']),
-              dbId: snapshot.documentID
+              dbRef: ref
             ) : Player();
           })
         );
@@ -210,7 +211,7 @@ class _LogListState extends State<LogList> {
       if (doc.data['winners'] != null) {
         for (DocumentReference pRef in doc.data['winners']) {          
           for (Player p in players) {
-            if (p.dbId == pRef.documentID) {
+            if (p.dbRef == pRef) {
               winners.add(p);
               break;
             }
@@ -223,7 +224,7 @@ class _LogListState extends State<LogList> {
           List<Player> team = [];          
           for (DocumentReference pRef in pRefs) {
             for (Player p in players) {
-              if (p.dbId == pRef.documentID) {
+              if (p.dbRef == pRef) {
                 team.add(p);
                 break;
               }
@@ -235,7 +236,7 @@ class _LogListState extends State<LogList> {
       if (doc.data['scores'] != null) {
         for (String pRefId in doc.data['scores'].keys) {          
           for (Player p in players) {
-            if (p.dbId == pRefId) {
+            if (p.dbRef.documentID == pRefId) {
               scores.putIfAbsent(p, () => doc.data['scores'][pRefId]);
               break;
             }
