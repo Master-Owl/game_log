@@ -7,6 +7,7 @@ import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/utils/helper-funcs.dart';
+import 'package:game_log/screens/view-log-page.dart';
 
 class LogList extends StatefulWidget {
 
@@ -85,7 +86,14 @@ class _LogListState extends State<LogList> {
           )
         ),
         isWaiting ? 
-          Text('Loading...', style: Theme.of(context).textTheme.title) :
+          Padding(
+            padding: EdgeInsets.only(top: 125.0),
+            child: SizedBox(
+              height: 100.0,
+              width: 100.0,
+              child: CircularProgressIndicator(value: null) 
+            )
+          ) :
         err != '' ?
           Text(err, style: Theme.of(context).textTheme.title) :
           ListView(
@@ -119,8 +127,23 @@ class _LogListState extends State<LogList> {
         makeListTile(
           Text(play.game.name),
           Text(formatDate(play.playDate)),
-          () {
-            // TODO: Go to gameplay view page
+          () async {
+            GamePlay changedPlay = await Navigator.push(
+              context, 
+              MaterialPageRoute<GamePlay>(
+                builder: (context) => ViewLogPage(gameplay: play),
+                maintainState: true                
+              )
+            );
+
+            if (changedPlay != null && changedPlay != play) {
+              setState(() {
+                int idx = gameplays.indexOf(play);
+                gameplays.removeAt(idx);
+                gameplays.insert(idx, changedPlay);
+              });
+              // also update the db
+            }
           }
         )
       );
@@ -160,17 +183,18 @@ class _LogListState extends State<LogList> {
           );
         })
       );
-      playerRefs.forEach((ref) {
+
+      for (DocumentReference ref in playerRefs) {
         futures.add(
-          ref.get().then((snapshot) {
-            return Player(
+          ref.get().then((snapshot) {         
+            return snapshot.data != null ? Player(
               name: snapshot.data['name'],
               color: Color(snapshot.data['color']),
               dbId: snapshot.documentID
-            );
+            ) : Player();
           })
         );
-      });
+      }
       
       List responses = await Future.wait(futures);
 
@@ -179,12 +203,57 @@ class _LogListState extends State<LogList> {
         players.add(responses[i]);
       }
 
-      gameplays.add(GamePlay(
-        game: responses[0],
-        players: players,
-        playTime: Duration(minutes: doc.data['playtime']),
-        playDate: doc.data['playdate']
-      ));
+      // Optional data
+      List<Player> winners = [];
+      Map<String, List<Player>> teams = {};
+      Map<Player, int> scores = {};
+      if (doc.data['winners'] != null) {
+        for (DocumentReference pRef in doc.data['winners']) {          
+          for (Player p in players) {
+            if (p.dbId == pRef.documentID) {
+              winners.add(p);
+              break;
+            }
+          }
+        }
+      }
+      if (doc.data['teams'] != null) {
+        for (String teamName in doc.data['teams'].keys) {          
+          List pRefs = doc.data['teams'][teamName];
+          List<Player> team = [];          
+          for (DocumentReference pRef in pRefs) {
+            for (Player p in players) {
+              if (p.dbId == pRef.documentID) {
+                team.add(p);
+                break;
+              }
+            }
+          }
+          teams.putIfAbsent(teamName, () => team);
+        }
+      }
+      if (doc.data['scores'] != null) {
+        for (String pRefId in doc.data['scores'].keys) {          
+          for (Player p in players) {
+            if (p.dbId == pRefId) {
+              scores.putIfAbsent(p, () => doc.data['scores'][pRefId]);
+              break;
+            }
+          }
+        }        
+      }
+
+      setState(() {
+        gameplays.add(GamePlay(
+          responses[0],
+          players,
+          playTime: Duration(minutes: doc.data['playtime']),
+          playDate: doc.data['playdate'],
+          teams: teams,
+          scores: scores,
+          winners: winners
+        ));
+      });
     });
   }
 }

@@ -23,7 +23,9 @@ enum WinConditions {
   score_lowest,
   single_winner,
   single_loser,
-  last_standing
+  single_team,
+  last_standing,
+  all_or_nothing,
 }
 WinConditions winConditionFromString(String c) {
   switch (c) {
@@ -32,6 +34,8 @@ WinConditions winConditionFromString(String c) {
     case 'single_winner': return WinConditions.single_winner;
     case 'single_loser': return WinConditions.single_loser;
     case 'last_standing': return WinConditions.last_standing;
+    case 'all_or_nothing': return WinConditions.all_or_nothing;
+    case 'single_team': return WinConditions.single_team;
     default: return null;
   }
 }
@@ -42,6 +46,8 @@ String winConditionString(WinConditions c) {
     case WinConditions.single_winner: return 'Single Winner';
     case WinConditions.single_loser: return 'Single Loser';
     case WinConditions.last_standing: return 'Last Standing';      
+    case WinConditions.all_or_nothing: return 'All Win or Lose';
+    case WinConditions.single_team: return 'Single Team';
     default: return '';
   }
 }

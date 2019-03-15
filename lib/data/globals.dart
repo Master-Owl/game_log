@@ -17,6 +17,7 @@ const Color defaultBlack = Colors.black87;
 const Color defaultWhite = Colors.white;
 const double lrPadding = 16.0;
 const double headerPaddingTop = 48.0;
+const Duration animDuration =Duration(milliseconds: 400);
 
 List<Player> mockPlayerData = [
   Player(name: 'Trent', color: Colors.red[400]),

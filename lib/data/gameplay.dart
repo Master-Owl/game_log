@@ -1,12 +1,35 @@
 import './game.dart';
 import './player.dart';
 
+/// GamePlays always have an associated game
+/// and a list of players. It should also
+/// generally have a play date & play time (duration).
+/// 
+/// Depending on the game type it may or 
+/// may not have other fields:
+/// 
+/// Standard:
+///  [x] scores
+///  [x] winners
+///  [] teams
+/// 
+/// Cooperative:
+///  [] scores
+///  [x] winners
+///  [] teams
+/// 
+/// Team:
+///  [] scores
+///  [x] winners
+///  [x] teams
+
 class GamePlay {
-  GamePlay({ this.game, this.players, this.winners, this.scores, this.playDate, this.playTime }) {
+  GamePlay(this.game, this.players, { this.playDate, this.playTime, this.scores, this.teams, this.winners }) {
     if (game == null) game = new Game(name: '');
     if (players == null) {
       players = [];
-      winners = {};
+      winners = [];
+      teams = {};
       scores = {};
     }
     if (playDate == null) {
@@ -18,11 +41,11 @@ class GamePlay {
   }
 
   Game game;
-  List<Player> players;
   DateTime playDate;
   Duration playTime;
 
-  // int refers to the list index of the player
-  Map<int, bool> winners;
-  Map<int, int> scores;
+  List<Player> players;
+  List<Player> winners;
+  Map<Player, int> scores;
+  Map<String, List<Player>> teams;
 }

@@ -5,6 +5,7 @@ import 'package:game_log/data/player.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/player-edit-page.dart';
+import 'package:game_log/data/game.dart';
 
 class PlayerList extends StatefulWidget {
   PlayerList({ Key key, this.gameplay }) : super(key: key);
@@ -24,7 +25,7 @@ class _PlayerListState extends State<PlayerList> {
 
   @override
   void initState() {
-    if (gameplay == null) gameplay = GamePlay();
+    if (gameplay == null) gameplay = GamePlay(Game(), []);
 
     players = List<Player>.from(gameplay.players); // create copy of players until saved
     allSavedPlayers = new List<Player>();
@@ -54,7 +55,6 @@ class _PlayerListState extends State<PlayerList> {
     fetchDB = false;
     double listTileHeight = 50.0;
     double minHeight = 200.0;
-    Color primary = Theme.of(context).primaryColor;
     Color accent = Theme.of(context).accentColor;
 
     // Set all players
@@ -63,14 +63,6 @@ class _PlayerListState extends State<PlayerList> {
       snapshot.data.documents.forEach((doc) {
         Player p = Player(name: doc.data['name'], color: Color(doc.data['color']), dbId: doc.documentID);
         allSavedPlayers.add(p);
-
-        // For testing w/ mock data
-        // for (int i = 0; i < players.length; ++i) {
-        //   if (players[i].name == p.name && players[i].color == p.color) {
-        //     players[i] = p;
-        //     break;
-        //   }
-        // }
       });
     }
 

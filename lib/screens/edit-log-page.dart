@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
 import 'package:game_log/data/gameplay.dart';
+import 'package:game_log/data/game.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/player-list.dart';
@@ -30,7 +31,7 @@ class _EditLogState extends State<EditLogPage> {
     isNewLog = gamePlay == null;
     appBarTitle = isNewLog ? 'New Log' : 'Edit Log';
 
-    if (isNewLog) gamePlay = new GamePlay();
+    if (isNewLog) gamePlay = new GamePlay(Game(), []);
     playDate = gamePlay.playDate;
     playTime = gamePlay.playTime;
     super.initState();

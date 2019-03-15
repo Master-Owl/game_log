@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/log-list.dart';
+import 'package:game_log/screens/edit-log-page.dart';
 
 class LogsPage extends StatefulWidget {
   LogsPage({Key key, this.subpages}) : super(key: key);
@@ -26,11 +27,7 @@ class _LogsPageState extends State<LogsPage> with SingleTickerProviderStateMixin
     super.initState();
 
     _currentSubpageIdx = 0;
-    animController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: 400)
-    );
-
+    animController = AnimationController(vsync: this, duration: animDuration);
     anim = Tween(begin: 0.0, end: 1.0).animate(animController);
   }
 
@@ -52,7 +49,13 @@ class _LogsPageState extends State<LogsPage> with SingleTickerProviderStateMixin
                 )
               ],
             )
-        )
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add, color: Colors.white),
+          onPressed: () => {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => EditLogPage()))
+          },
+        ),
       );
   }
 }
