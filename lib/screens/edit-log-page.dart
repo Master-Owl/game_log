@@ -167,8 +167,7 @@ class _EditLogState extends State<EditLogPage> {
       Firestore.instance.collection('gameplays').document()
         .setData(gamePlay.serialize());
     } else {
-      Firestore.instance.collection('gameplays').document(gamePlay.dbRef.documentID)
-        .setData(gamePlay.serialize());
+      gamePlay.dbRef.setData(gamePlay.serialize());
     }
 
     Navigator.pop(context, gamePlay);

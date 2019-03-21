@@ -8,6 +8,7 @@ import 'package:game_log/data/game.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/screens/view-log-page.dart';
+import 'package:game_log/widgets/slide-transition.dart';
 
 class LogList extends StatefulWidget {
 
@@ -40,6 +41,8 @@ class _LogListState extends State<LogList> {
     super.initState();
   }
 
+
+  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
   @override
   Widget build(BuildContext context) {
     if (fetchDB) {
@@ -130,9 +133,9 @@ class _LogListState extends State<LogList> {
           () async {
             GamePlay changedPlay = await Navigator.push(
               context, 
-              MaterialPageRoute<GamePlay>(
-                builder: (context) => ViewLogPage(gameplay: play),
-                maintainState: true                
+              SlideRouteTransition<GamePlay>(
+                widget: ViewLogPage(gameplay: play),
+                direction: SlideDirection.Left
               )
             );
 
@@ -141,6 +144,7 @@ class _LogListState extends State<LogList> {
                 int idx = gameplays.indexOf(play);
                 gameplays.removeAt(idx);
                 gameplays.insert(idx, changedPlay);
+                fetchDB = true;
               });
               // also update the db
             }
@@ -169,62 +173,38 @@ class _LogListState extends State<LogList> {
   void fetchGameplayData(AsyncSnapshot<QuerySnapshot> snapshot) {
     gameplays.clear();
     snapshot.data.documents.forEach((doc) async {
-      List<Future> futures = [];
       DocumentReference gameRef = doc.data['game'];
       List playerRefs = doc.data['players'];
-
-      futures.add(
-        gameRef.get().then((snapshot) {
-          return Game(
-            name: snapshot.data['name'],
-            type: gameTypeFromString(snapshot.data['type']),
-            condition: winConditionFromString(snapshot.data['wincondition']),
-            bggId: snapshot.data['bggid'],
-            dbRef: snapshot.reference
-          );
-        })
-      );
-
-      for (DocumentReference ref in playerRefs) {
-        futures.add(
-          ref.get().then((snapshot) {
-            return snapshot.data != null ? Player(
-              name: snapshot.data['name'],
-              color: Color(snapshot.data['color']),
-              dbRef: ref
-            ) : Player();
-          })
-        );
-      }
+      playerRefs = List<DocumentReference>.from(playerRefs);
       
-      List responses = await Future.wait(futures);
-
-      List<Player> players = [];
-      for (int i = 1; i < responses.length; ++i) {
-        players.add(responses[i]);
-      }
+      Game game = await gameRef.get().then((snapshot) {
+        return Game(
+          name: snapshot.data['name'],
+          type: gameTypeFromString(snapshot.data['type']),
+          condition: winConditionFromString(snapshot.data['wincondition']),
+          bggId: snapshot.data['bggid'],
+          dbRef: snapshot.reference
+        );
+      });
 
       // Optional data
-      List<Player> winners = [];
-      Map<String, List<Player>> teams = {};
-      Map<Player, int> scores = {};
+      List<String> winners = [];
+      Map<String, List<DocumentReference>> teams = {};
+      Map<String, int> scores = {};
+
       if (doc.data['winners'] != null) {
-        for (DocumentReference pRef in doc.data['winners']) {          
-          for (Player p in players) {
-            if (p.dbRef == pRef) {
-              winners.add(p);
-              break;
-            }
-          }
+        for (String winner in doc.data['winners']) {          
+          winners.add(winner);
         }
       }
+
       if (doc.data['teams'] != null) {
         for (String teamName in doc.data['teams'].keys) {          
           List pRefs = doc.data['teams'][teamName];
-          List<Player> team = [];          
+          List<DocumentReference> team = [];          
           for (DocumentReference pRef in pRefs) {
-            for (Player p in players) {
-              if (p.dbRef == pRef) {
+            for (DocumentReference p in playerRefs) {
+              if (p == pRef) {
                 team.add(p);
                 break;
               }
@@ -233,11 +213,12 @@ class _LogListState extends State<LogList> {
           teams.putIfAbsent(teamName, () => team);
         }
       }
+
       if (doc.data['scores'] != null) {
         for (String pRefId in doc.data['scores'].keys) {          
-          for (Player p in players) {
-            if (p.dbRef.documentID == pRefId) {
-              scores.putIfAbsent(p, () => doc.data['scores'][pRefId]);
+          for (DocumentReference p in playerRefs) {
+            if (p.documentID == pRefId) {
+              scores.putIfAbsent(p.documentID, () => doc.data['scores'][pRefId]);
               break;
             }
           }
@@ -246,8 +227,8 @@ class _LogListState extends State<LogList> {
 
       setState(() {
         gameplays.add(GamePlay(
-          responses[0],
-          players,
+          game,
+          playerRefs,
           playTime: Duration(minutes: doc.data['playtime']),
           playDate: doc.data['playdate'],
           teams: teams,

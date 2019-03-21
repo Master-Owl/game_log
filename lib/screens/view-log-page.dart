@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/globals.dart';
@@ -5,6 +6,8 @@ import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/screens/edit-log-page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:swipedetector/swipedetector.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key:key);
@@ -15,17 +18,20 @@ class ViewLogPage extends StatefulWidget {
 }
 
 class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMixin {
-  _ViewLogState(this.gamePlay);
+  _ViewLogState(this.gameplay);
 
-  GamePlay gamePlay;
+  GamePlay gameplay;
+  List<Player> players;
   AnimationController animController;
   Animation<double> anim;
 
   @override
   void initState() {
-    super.initState();    
+    super.initState();
+    players = [];
     animController = AnimationController(vsync: this, duration: animDuration);
     anim = Tween(begin: 0.0, end: 1.0).animate(animController);
+    fetchPlayers();
   }
 
   @override
@@ -33,82 +39,89 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     TextStyle headline =TextStyle(fontWeight: FontWeight.w300, fontSize: 42.0, color:defaultGray);
     TextStyle title = TextStyle(fontWeight: FontWeight.w300, fontSize: 28.0, color: defaultGray);
     TextStyle datetime = TextStyle(fontWeight: FontWeight.w500, fontSize: 22.0, color: defaultGray);
-    String playersTitle = gamePlay.game.type == GameType.team ? 'Teams' : 'Players';
+    String playersTitle = gameplay.game.type == GameType.team ? 'Teams' : 'Players';
+
+    Widget playersWidget = players.length > 0 ? 
+      ListView(
+        padding: EdgeInsets.only(left: 10.0, top: 6.0),
+        itemExtent: 45.0,
+        shrinkWrap: true,
+        children: buildPlayerList(),                
+      ) :
+      Center(child: CircularProgressIndicator(value: null)); 
 
     animController.forward();
 
     return Scaffold(
-      body: Container(
-        padding: const EdgeInsets.only(left:lrPadding, right:lrPadding, top:headerPaddingTop),
-        child: FadeTransition(
-          opacity: anim,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Text(gamePlay.game.name, style: headline)
-              ),
-              Padding(
-                padding:EdgeInsets.only(top: 36.0),
-                child: RichText(
-                  text: TextSpan(
-                    text: 'Played On: ',
-                    style: title,
-                    children: [
-                      TextSpan(
-                        text: formatDate(gamePlay.playDate),
-                        style: datetime
-                      )
-                    ]
+      body: SwipeDetector(
+        child: Container(
+          padding: EdgeInsets.only(left:lrPadding, right:lrPadding, top:headerPaddingTop),
+          child: FadeTransition(
+            opacity: anim,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: Text(gameplay.game.name, style: headline)
+                ),
+                Padding(
+                  padding:EdgeInsets.only(top: 36.0),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Played On: ',
+                      style: title,
+                      children: [
+                        TextSpan(
+                          text: formatDate(gameplay.playDate),
+                          style: datetime
+                        )
+                      ]
+                    )
+                  )
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: RichText(
+                    text: TextSpan(
+                      text: 'Play Time: ',
+                      style: title,
+                      children: [
+                        TextSpan(
+                          text: formatTimeDuration(gameplay.playTime), 
+                          style: datetime
+                        ),
+                      ],
+                    ),
+                  )
+                ),
+                Padding(
+                  padding:EdgeInsets.only(top: 24.0),
+                  child: Text(playersTitle, style: title)
+                ),
+                playersWidget,
+                Padding(
+                  padding:EdgeInsets.only(top: 26.0),
+                  child: Center(
+                    child: RaisedButton(
+                      child: Text('Edit Log', style: Theme.of(context).textTheme.button),
+                      padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
+                      color: Theme.of(context).accentColor,
+                      onPressed: () async {
+                        GamePlay changed = await Navigator.push(context, 
+                          MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gameplay)));
+                        if (changed != null && changed != gameplay) {
+                          setState(() => { gameplay = changed });
+                        }
+                      },
+                    )
                   )
                 )
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 8.0),
-                child: RichText(
-                  text: TextSpan(
-                    text: 'Play Time: ',
-                    style: title,
-                    children: [
-                      TextSpan(
-                        text: formatTimeDuration(gamePlay.playTime), 
-                        style: datetime
-                      ),
-                    ],
-                  ),
-                )
-              ),
-              Padding(
-                padding:EdgeInsets.only(top: 24.0),
-                child: Text(playersTitle, style: title)
-              ),
-              ListView(
-                padding: EdgeInsets.only(left: 10.0, top: 6.0),
-                itemExtent: 45.0,
-                shrinkWrap: true,
-                children: buildPlayerList(),                
-              ),
-              Padding(
-                padding:EdgeInsets.only(top: 26.0),
-                child: Center(
-                  child: RaisedButton(
-                    child: Text('Edit Log', style: Theme.of(context).textTheme.button),
-                    padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
-                    color: Theme.of(context).accentColor,
-                    onPressed: () async {
-                      GamePlay changed = await Navigator.push(context, 
-                        MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gamePlay)));
-                      if (changed != null && changed != gamePlay) {
-                        setState(() => { gamePlay = changed });
-                      }
-                    },
-                  )
-                )
-              )
-            ]
+              ]
+            )
           )
-        )
-      ),
+        ),
+        onSwipeRight: () => { Navigator.pop(context, gameplay) },
+      )
     );
   }
 
@@ -117,26 +130,25 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     List<Widget> tiles = [];
     List<Color> colors = [
       Colors.green,
-      Colors.indigo,
+      Colors.purple,
       Colors.red,
       Colors.blue,
-      Colors.yellow,
-      Colors.orange,
+      Colors.teal
     ];
     colors.shuffle();
     Map<String, Color> teamColors = {};
 
-    for (Player player in gamePlay.players) {
+    for (Player player in players) {
       Color tileColor;
       Widget appendedWidget = Container();
 
-      switch (gamePlay.game.type) {
+      switch (gameplay.game.type) {
         case GameType.standard:          
           tileColor = player.color;
           Widget badge = Icon(Icons.whatshot, color: Colors.yellow);          
           Widget pointText = RichText(
             text: TextSpan(
-              text: gamePlay.scores[playerOrTeamIdx++].toString(),
+              text: gameplay.scores[playerOrTeamIdx++].toString(),
               style: TextStyle(fontWeight: FontWeight.bold),
               children: [
                 TextSpan(
@@ -147,7 +159,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             ),
           );
 
-          if (gamePlay.winners.contains(player)) {
+          if (gameplay.winners.contains(player)) {
             appendedWidget = ListTile(
               leading: badge,
               title: pointText,
@@ -163,8 +175,8 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
 
         case GameType.team:
           String team = '';
-          for (String teamName in gamePlay.teams.keys) {            
-            if (gamePlay.teams[teamName].contains(player)) {
+          for (String teamName in gameplay.teams.keys) {            
+            if (gameplay.teams[teamName].contains(player.dbRef)) {
               team = teamName;
               break;
             }
@@ -185,7 +197,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             teamColors.putIfAbsent(team, () => tileColor);
           }
 
-          if (gamePlay.winners.contains(player)) {
+          if (gameplay.winners.contains(player)) {
             appendedWidget = Icon(Icons.whatshot, color: Colors.yellow);
           }
           break;
@@ -207,5 +219,32 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     }
     
     return tiles;
+  }
+
+  void fetchPlayers() async {
+    List<DocumentReference> pRefs = gameplay.playerRefs;
+    List<Future> futures = [];
+    List<Player> fetchedPlayers = [];
+
+    pRefs.forEach((ref) {
+      futures.add(
+        ref.get().then((snapshot) => {
+          fetchedPlayers.add(
+            Player(
+              dbRef: ref, 
+              name: snapshot.data['name'], 
+              color: Color(snapshot.data['color'])
+            )
+          )
+        })
+      );
+    });
+
+    await Future.wait(futures);
+
+    setState(() {
+      players = fetchedPlayers;
+      gameplay.players = players;
+    });
   }
 }

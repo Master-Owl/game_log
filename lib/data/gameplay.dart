@@ -25,13 +25,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 ///  [x] teams
 
 class GamePlay {
-  GamePlay(this.game, this.players, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef }) {
+  GamePlay(this.game, this.playerRefs, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef, this.players }) {
     if (game == null) game = new Game(name: '');
-    if (players == null) {
-      players = [];
+    if (playerRefs == null) {
+      playerRefs = [];
       winners = [];
       teams = {};
       scores = {};
+    }
+    if (players == null) {
+      players = [];
     }
     if (playDate == null) {
       playDate = DateTime.now();
@@ -46,11 +49,14 @@ class GamePlay {
   Duration playTime;
 
   List<Player> players;
-  List<Player> winners;
-  Map<Player, int> scores;
-  Map<String, List<Player>> teams;
+  List<DocumentReference> playerRefs;
+  List<String> winners;
+  Map<String, int> scores;
+  Map<String, List<DocumentReference>> teams;
 
   DocumentReference dbRef;
+
+  int get playerCount => playerRefs.length;
 
   Map<String, dynamic> serialize() {
     Map<String, dynamic> data = {};
@@ -58,38 +64,23 @@ class GamePlay {
     data['game'] = game.dbRef;
     data['playdate'] = playDate;
     data['playtime'] = playTime.inMinutes;
-    
-
-    if (players.length > 0) {      
-      List<DocumentReference> pRefs = [];
-      for (Player p in players) {
-        pRefs.add(p.dbRef);
-      }
-      data['players'] = pRefs;
-    }
+    data['players'] = playerRefs;
+    data['winners'] = winners;
 
     if (scores.length > 0) {
       Map<String, int> pScores = {};
-      for (Player p in scores.keys) {
-        pScores[p.dbRef.documentID] = scores[p];
+      for (String pRef in scores.keys) {
+        pScores[pRef] = scores[pRef];
       }
       data['scores'] = pScores;
-    }
-
-    if (winners.length > 0) {
-      List<DocumentReference> winnerRefs = [];
-      for (Player p in winners) {
-        winnerRefs.add(p.dbRef);
-      }
-      data['winners'] = winnerRefs;
     }
 
     if (teams.length > 0) {
       Map<String, List<DocumentReference>> teamRefs = {};
       for (String teamName in teams.keys) {
         List<DocumentReference> pRefs = [];
-        for (Player p in teams[teamName]) {
-          pRefs.add(p.dbRef);
+        for (DocumentReference p in teams[teamName]) {
+          pRefs.add(p);
         }
         teamRefs[teamName] = pRefs;
       }

@@ -26,71 +26,33 @@ class _PlayerListState extends State<PlayerList> {
   @override
   void initState() {
     if (gameplay == null) gameplay = GamePlay(Game(), []);
+    players = gameplay.players;
+    allSavedPlayers = [];
 
-    players = List<Player>.from(gameplay.players); // create copy of players until saved
-    allSavedPlayers = new List<Player>();
+    Firestore.instance.collection('players')
+      .getDocuments()
+      .then((snapshot) {
+        List dbPlayers = [];
+        snapshot.documents.forEach((doc) {
+          dbPlayers.add(Player(
+            name: doc.data['name'],
+            color: Color(doc.data['color']),
+            dbRef: doc.reference
+          ));          
+        });
+        setState(() {
+          allSavedPlayers = dbPlayers; 
+        });
+      });
     super.initState();
   }
 
-  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
   @override
   Widget build(BuildContext context) {
-    if (fetchDB) {
-      return StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance.collection('players').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError)
-            return mainView(context, false, null, 'Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting: return mainView(context, true, null, '');
-            default: return mainView(context, false, snapshot, '');
-          }
-        },
-      );
-    }
-    return mainView(context, false, null, '');
-  }
-
-  Widget mainView(BuildContext context, bool waiting, AsyncSnapshot<QuerySnapshot> snapshot, String err) {
     fetchDB = false;
     double listTileHeight = 50.0;
     double minHeight = 200.0;
     Color accent = Theme.of(context).accentColor;
-
-    // Set all players
-    if (snapshot != null) {
-      allSavedPlayers.clear();
-      snapshot.data.documents.forEach((doc) {
-        Player p = Player(
-          name: doc.data['name'],
-          color: Color(doc.data['color']),
-          dbRef: doc.reference
-        );
-        allSavedPlayers.add(p);
-      });
-    }
-
-    // Build player list
-    Widget content = players.length > 0 && !waiting ? 
-      ListView(
-        shrinkWrap: true,
-        itemExtent: listTileHeight,
-        children: buildListTiles()
-      ) :
-      Center(
-        child: Text(
-          err == '' ? 
-            waiting ? 
-              'Loading...' : 
-              'No Players Added Yet' :
-            err,
-          style: TextStyle(
-            color: defaultGray,
-            fontSize: 20.0,
-            letterSpacing: 0.5
-          )
-        )
-      );
 
     // Layout the list
     return Column(
@@ -109,7 +71,7 @@ class _PlayerListState extends State<PlayerList> {
               IconButton(
                 icon: Icon(Icons.add, color: accent),
                 tooltip: 'Add Player',
-                onPressed: waiting && err != null ? null : addPerson, // add player
+                onPressed: allSavedPlayers.length > 0 ? addPerson : null, // add player
               )
             ]
           ),
@@ -121,7 +83,11 @@ class _PlayerListState extends State<PlayerList> {
               ),
             ),
             height: minHeight,
-            child: content
+            child: ListView(
+              shrinkWrap: true,
+              itemExtent: listTileHeight,
+              children: buildListTiles()
+            )
           )
         ]
       );
