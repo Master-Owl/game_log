@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
-import 'package:game_log/screens/edit-log-page.dart';
+import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
 import 'package:game_log/screens/add-game-page.dart';
 
 class HomePage extends StatefulWidget {

@@ -5,7 +5,7 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
-import 'package:game_log/screens/edit-log-page.dart';
+import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:swipedetector/swipedetector.dart';
 
@@ -107,11 +107,15 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                       padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
                       color: Theme.of(context).accentColor,
                       onPressed: () async {
-                        GamePlay changed = await Navigator.push(context, 
-                          MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gameplay)));
+                        GamePlay changed = await Navigator.push(
+                          context, 
+                          MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gameplay), maintainState: false)
+                        );
                         if (changed != null && changed != gameplay) {
+                          print('changed');
                           setState(() => { gameplay = changed });
                         }
+                        print('done');
                       },
                     )
                   )

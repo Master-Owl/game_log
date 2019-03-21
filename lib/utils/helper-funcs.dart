@@ -12,6 +12,18 @@ Color determineTextColor(Color background) {
   return defaultWhite;
 }
 
+Color getRandomColor() {
+  List<Color> colors = [
+    Colors.green,
+    Colors.purple,
+    Colors.red,
+    Colors.blue,
+    Colors.teal
+  ];
+  colors.shuffle();
+  return colors[0];
+}
+
 String formatDate(DateTime date) {
   int day = date.day;
   int month = date.month;

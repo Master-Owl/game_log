@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/log-list.dart';
-import 'package:game_log/screens/edit-log-page.dart';
+import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
 
 class LogsPage extends StatefulWidget {
   LogsPage({Key key, this.subpages}) : super(key: key);
