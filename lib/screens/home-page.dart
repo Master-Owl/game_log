@@ -19,41 +19,54 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => new _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   final String pageTitle = 'GameLog';
+
+  AnimationController animController;
+
+  @override
+  void initState() {
+    super.initState();
+    animController =AnimationController(vsync: this, duration: animDuration);
+  }
 
   @override
   Widget build(BuildContext context) {
+    animController.fling();
+
     return Scaffold(
       body: Container(
         padding: const EdgeInsets.fromLTRB(lrPadding,headerPaddingTop,lrPadding,0),
-        child: Column(
-          children: [
-            Center(
-                child: Text(
-                  pageTitle,
-                  style: Theme.of(context).textTheme.headline
+        child: FadeTransition(
+          opacity: Tween(begin: 0.0, end: 1.0).animate(animController),
+          child: Column(
+            children: [
+              Center(
+                  child: Text(
+                    pageTitle,
+                    style: Theme.of(context).textTheme.headline
+                  )
+              ),
+              Padding(
+                padding:EdgeInsets.only(top: 200.0),
+                child: RaisedButton(
+                  onPressed: _createLog,
+                  padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+                  child: Text('Create Log', style: Theme.of(context).textTheme.button),
+                  color: Theme.of(context).primaryColor,
                 )
-            ),
-            Padding(
-              padding:EdgeInsets.only(top: 200.0),
-              child: RaisedButton(
-                onPressed: _createLog,
-                padding: EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
-                child: Text('Create Log', style: Theme.of(context).textTheme.button),
-                color: Theme.of(context).primaryColor,
-              )
-            ),
-            Padding(
-              padding:EdgeInsets.only(top: 24.0),
-              child: RaisedButton(
-                onPressed: _addGame,
-                padding:  EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
-                child: Text('Add Game', style: Theme.of(context).textTheme.button),
-                color: Theme.of(context).primaryColor,
-              )
-            ),
-          ],
+              ),
+              Padding(
+                padding:EdgeInsets.only(top: 24.0),
+                child: RaisedButton(
+                  onPressed: _addGame,
+                  padding:  EdgeInsets.fromLTRB(24.0, 12.0, 24.0, 12.0),
+                  child: Text('Add Game', style: Theme.of(context).textTheme.button),
+                  color: Theme.of(context).primaryColor,
+                )
+              ),
+            ],
+          )
         )
       )
     );

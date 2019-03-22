@@ -42,7 +42,7 @@ String formatTimeOfDay(TimeOfDay time) {
 String formatTimeDuration(Duration time) {
   int hr = time.inHours;
   int min = time.inMinutes % 60;
-  String minStr = min == 0 ? '00' : min < 10 ? '0$min' : min.toString();
+  String minStr = min == 0 ? hr == 0 ? '0' : '00' : min < 10 ? '0$min' : min.toString();
   if (hr == 0) return '${minStr}m';
   return '${hr}h ${minStr}m';
 }
