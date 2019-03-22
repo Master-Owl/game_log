@@ -9,6 +9,7 @@ import 'package:game_log/widgets/slide-transition.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
+import 'package:game_log/screens/settings-page.dart';
 import 'routes.dart';
 
 void main() => runApp(new MyApp());
@@ -70,7 +71,11 @@ class MyApp extends StatelessWidget {
           case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
           case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
           case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
+          case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());
         }
+      },
+      onUnknownRoute: (settings) {
+        
       },
 
     );

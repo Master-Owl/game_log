@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/screens/home-page.dart';
 import 'package:game_log/screens/logs-page.dart';
-import 'package:game_log/screens/settings-page.dart';
+import 'package:game_log/screens/games-page.dart';
 import 'package:game_log/data/globals.dart';
 
 class MainAppRoutes extends StatefulWidget {
@@ -16,7 +16,7 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
   Widget _currentPage;
   List<Widget> _mainPages;
   List<BottomNavigationBarItem> _items = [
-    BottomNavigationBarItem(icon: Icon(Icons.settings), title: Text('Settings'),),
+    BottomNavigationBarItem(icon: Icon(Icons.spa), title: Text('Games'),),
     BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
     BottomNavigationBarItem(icon: Icon(Icons.view_list), title: Text('Logs'))
   ];
@@ -24,7 +24,7 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
   @override
   void initState() {
     _mainPages = [
-      SettingsPage(),
+      GamesPage(),
       HomePage(),
       LogsPage()
     ];

@@ -8,7 +8,7 @@ import 'package:game_log/widgets/slide-transition.dart';
 StreamController<int> tabIdxController = StreamController<int>.broadcast();
 
 const tabs = {
-  'settings': 0,
+  'games': 0,
   'home': 1,
   'logs': 2
 };

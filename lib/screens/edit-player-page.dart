@@ -42,10 +42,11 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
           })
         });
       name = player.name;
-      color = player.color;
+      color = player.color == null ? Colors.black : player.color;
     }
 
     appBarTitle = newPlayer ? 'Create New Player' : 'Edit Player';
+    color = Colors.grey;
     super.initState();
   }
 
@@ -60,7 +61,7 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
                 tooltip: 'Save',
                 onPressed: () {
                   player.name = name == '' ? 'Anonymous' : name;
-                  player.color = color == null ? Colors.black : color;
+                  player.color = color;
                   if (player.name != 'Anonymous')
                     updatePlayerDB(player);
 
