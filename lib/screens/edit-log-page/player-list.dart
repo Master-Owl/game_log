@@ -4,10 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/globals.dart';
-import 'package:game_log/screens/player-edit-page.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/utils/helper-funcs.dart';
-import 'package:game_log/widgets/slide-transition.dart';
 
 class PlayerList extends StatefulWidget {
   PlayerList({ Key key, this.gameplay }) : super(key: key);
@@ -29,7 +27,7 @@ class _PlayerListState extends State<PlayerList> {
 
   @override
   void initState() {
-    if (gameplay == null) gameplay = GamePlay(Game(), []);
+    if (gameplay == null) gameplay = GamePlay(Game(), null);
     players = gameplay.players;
     gameType = gameplay.game.type;
     allSavedPlayers = [];
@@ -318,12 +316,12 @@ class _PlayerListState extends State<PlayerList> {
           ]
         ),
         onPressed: () async {
-          Player newPlayer = await Navigator.push(
+          Player newPlayer = await Navigator.pushNamed(
             context, 
-            SlideRouteTransition<Player>(
-              direction: SlideDirection.Left,
-              widget: PlayerEditPage()
-            )
+            '/edit-player-page',
+            arguments: {
+              'player': null
+            }
           );          
           Navigator.pop(context, newPlayer); // remove popup
         }

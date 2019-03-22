@@ -1,6 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game_log/data/globals.dart';
+import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
+import 'package:game_log/screens/edit-game-page.dart';
+import 'package:game_log/screens/edit-player-page.dart';
+import 'package:game_log/screens/view-log-page.dart';
+import 'package:game_log/widgets/slide-transition.dart';
+import 'package:game_log/data/gameplay.dart';
+import 'package:game_log/data/player.dart';
+import 'package:game_log/data/game.dart';
 import 'routes.dart';
 
 void main() => runApp(new MyApp());
@@ -53,7 +61,18 @@ class MyApp extends StatelessWidget {
             subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
       ),
-      home: MainAppRoutes()
+      home: MainAppRoutes(),
+      onGenerateRoute: (settings) {
+        Map<String, dynamic> args = settings.arguments;
+        switch (settings.name) {
+          case '/': return MaterialPageRoute(builder: (context) => MainAppRoutes());
+          case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: args['gameplay']));
+          case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
+          case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
+          case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
+        }
+      },
+
     );
   }
 }

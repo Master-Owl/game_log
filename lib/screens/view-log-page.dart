@@ -107,9 +107,12 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                       padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
                       color: Theme.of(context).accentColor,
                       onPressed: () async {
-                        GamePlay changed = await Navigator.push(
+                        GamePlay changed = await Navigator.pushNamed(
                           context, 
-                          MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: gameplay), maintainState: false)
+                          '/edit-log-page',
+                          arguments: {
+                            'gameplay':gameplay
+                          }
                         );
                         if (changed != null && changed != gameplay) {
                           print('changed');

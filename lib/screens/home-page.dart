@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
-import 'package:game_log/screens/add-game-page.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
@@ -61,11 +60,10 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _createLog() {
-    tabIdxController.sink.add(tabs['logs']);
-    Navigator.push(context, MaterialPageRoute(builder: (context) => EditLogPage()));
+    Navigator.pushNamed(context, '/edit-log-page', arguments: { 'gameplay': null });
   }
 
   void _addGame() {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => EditGamePage()));
+    Navigator.pushNamed(context, '/edit-game-page', arguments: { 'game': null });
   }
 }

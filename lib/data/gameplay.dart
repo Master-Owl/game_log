@@ -29,12 +29,18 @@ class GamePlay {
     if (game == null) game = new Game(name: '');
     if (playerRefs == null) {
       playerRefs = [];
-      winners = [];
-      teams = {};
-      scores = {};
     }
     if (players == null) {
       players = [];
+    }
+    if (teams == null) {
+      teams = {};
+    }
+    if (winners == null) {
+      winners = [];
+    }
+    if (scores == null) {
+      scores = {};
     }
     if (playDate == null) {
       playDate = DateTime.now();

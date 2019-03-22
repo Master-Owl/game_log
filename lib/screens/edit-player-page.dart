@@ -7,16 +7,16 @@ import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 
-class PlayerEditPage extends StatefulWidget {
-  PlayerEditPage({Key key, this.player}) : super(key: key);
+class EditPlayerPage extends StatefulWidget {
+  EditPlayerPage({Key key, this.player}) : super(key: key);
 
   final Player player;
 
-  _PlayerEditPageState createState() => _PlayerEditPageState(player);
+  _EditPlayerPageState createState() => _EditPlayerPageState(player);
 }
 
-class _PlayerEditPageState extends State<PlayerEditPage> {
-  _PlayerEditPageState(this.player);
+class _EditPlayerPageState extends State<EditPlayerPage> {
+  _EditPlayerPageState(this.player);
 
   Player player;
   String name = '';
