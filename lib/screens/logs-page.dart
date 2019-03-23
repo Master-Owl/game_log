@@ -53,9 +53,13 @@ class _LogsPageState extends State<LogsPage>
               )),
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add, color: Colors.white),
-            onPressed: () => {
-                  Navigator.pushNamed(context, '/edit-log-page',
-                      arguments: {'gamePlay': null})
+            onPressed: () async {
+                  GamePlay newPlay = await Navigator.pushNamed(
+                    context, '/edit-log-page',
+                    arguments: {'gameplay': null});
+                  if (newPlay != null) {
+                    setState(() => { gameplays.add(newPlay) });
+                  }
                 },
           ),
         ));

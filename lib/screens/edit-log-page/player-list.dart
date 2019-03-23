@@ -8,15 +8,15 @@ import 'package:game_log/data/game.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 
 class PlayerList extends StatefulWidget {
-  PlayerList({ Key key, this.gameplay }) : super(key: key);
+  PlayerList({ Key key, this.gameplay, this.onPlayerListChange }) : super(key: key);
   final GamePlay gameplay;
-
+  final Function(GamePlay) onPlayerListChange;
   @override
-  _PlayerListState createState() => _PlayerListState(gameplay);
+  _PlayerListState createState() => _PlayerListState(gameplay, onPlayerListChange);
 }
 
 class _PlayerListState extends State<PlayerList> {
-  _PlayerListState(this.gameplay);
+  _PlayerListState(this.gameplay, this.onPlayerListChange);
 
   GamePlay gameplay;
   List<Player> players;
@@ -24,20 +24,16 @@ class _PlayerListState extends State<PlayerList> {
   List<List<Player>> teams;
   List<Color> teamColors;
   GameType gameType;
+  GameType prevGameType;
+  Function(GamePlay) onPlayerListChange;
 
   @override
   void initState() {
     if (gameplay == null) gameplay = GamePlay(Game(), null);
     players = gameplay.players;
-    if (gameplay.game == null) {
-      gameType = GameType.standard;
-    } else {
-      gameType = gameplay.game.type;
-    }
     allSavedPlayers = [];
     teams = [];
     teamColors = [];
-    
     for (List<DocumentReference> teamList in gameplay.teams.values) {
       List<Player> team = [];
       for (DocumentReference pRef in teamList) {
@@ -70,6 +66,7 @@ class _PlayerListState extends State<PlayerList> {
           allSavedPlayers = dbPlayers; 
         });
       });
+      
     super.initState();
   }
 
@@ -78,6 +75,25 @@ class _PlayerListState extends State<PlayerList> {
     double listTileHeight = 50.0;
     double minHeight = 200.0;
     Color accent = Theme.of(context).accentColor;
+
+    if (gameplay.game == null) {
+      gameType = GameType.standard;
+    } else {
+      gameType = gameplay.game.type;
+
+      switch (gameType) {
+        case GameType.standard:
+        case GameType.cooperative:          
+          teams.clear();
+          break;
+        case GameType.team:
+          if (prevGameType !=GameType.team) {
+            players.clear();
+          }
+          break;
+      }
+    }
+    prevGameType = gameType;
 
     // Layout the list
     return Column(
@@ -128,6 +144,8 @@ class _PlayerListState extends State<PlayerList> {
       Player player = await addPerson();
       if (player != null) setState(() {
         players.add(player);
+        gameplay.players = players;
+        onPlayerListChange(gameplay);
       });
     } : null;
   }
@@ -161,6 +179,9 @@ class _PlayerListState extends State<PlayerList> {
               onPressed: () => setState(() {
                 for (Player p in team) { players.remove(p); }
                 teams.removeAt(i);
+                gameplay.players = players;
+                gameplay.teams = getTeams(teams);
+                onPlayerListChange(gameplay);
               }),
             ),
           ],
@@ -188,6 +209,9 @@ class _PlayerListState extends State<PlayerList> {
                   onPressed: () => setState(() {
                     teams[i].removeAt(j);
                     players.remove(player);
+                    gameplay.players = players;
+                    gameplay.teams =getTeams(teams);
+                    onPlayerListChange(gameplay);
                   }),
                 ),
               ]
@@ -198,6 +222,19 @@ class _PlayerListState extends State<PlayerList> {
     }
 
     return tiles;
+  }
+
+  Map<String, List<DocumentReference>> getTeams(List<List<Player>> teams) {
+    Map<String, List<DocumentReference>> gameplayTeams = {};
+    for (int i = 0; i < teams.length; ++i) {
+      String teamName = 'Team $i';
+      List<DocumentReference> players = [];
+      for (Player p in teams[i]) {
+        players.add(p.dbRef);
+      }
+      gameplayTeams.putIfAbsent(teamName, () => players);
+    }
+    return gameplayTeams;
   }
 
   List<Widget> buildListTiles(List<Player> playerList) {
@@ -254,6 +291,8 @@ class _PlayerListState extends State<PlayerList> {
                 color: Colors.red,
                 onPressed: () => setState(() {
                   players.remove(player);
+                  gameplay.players = players;
+                  onPlayerListChange(gameplay);
                 }),
               ),
             ]

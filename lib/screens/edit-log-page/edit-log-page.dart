@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_duration_picker/flutter_duration_picker.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/game.dart';
-import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,41 +9,40 @@ import 'package:game_log/widgets/game-picker-widget.dart';
 import './player-list.dart';
 
 class EditLogPage extends StatefulWidget {
-  EditLogPage({Key key, this.gamePlay }) : super(key: key);
+  EditLogPage({Key key, this.gameplay }) : super(key: key);
 
-  final GamePlay gamePlay;
+  final GamePlay gameplay;
 
   @override
-  _EditLogState createState() => _EditLogState(gamePlay);
+  _EditLogState createState() => _EditLogState(gameplay);
 }
 
 class _EditLogState extends State<EditLogPage> {
-  _EditLogState(this.gamePlay);
+  _EditLogState(this.gameplay);
 
-  GamePlay gamePlay;
-  bool isNewLog = false;
-  String appBarTitle = '';
-  Game game;
+  GamePlay gameplay;
   DateTime playDate;
   Duration playTime;
+  bool isNewLog = false;
+  Game game;
 
   @override
   void initState() {
-    isNewLog = gamePlay == null;
-    appBarTitle = isNewLog ? 'New Log' : 'Edit Log';
-
-    if (isNewLog) gamePlay = new GamePlay(Game(), []);
-    playDate = gamePlay.playDate;
-    playTime = gamePlay.playTime;
-    game = isNewLog ? null : gamePlay.game;
     super.initState();
+
+    isNewLog = gameplay == null;
+    if (isNewLog) gameplay = new GamePlay(Game(), []);
+
+    playDate = gameplay.playDate;
+    playTime = gameplay.playTime;
+    game = isNewLog ? null : gameplay.game;
   }
 
   @override
   Widget build(BuildContext context) {     
     return Scaffold(
       appBar: AppBar(
-        title: Text(appBarTitle, style: Theme.of(context).textTheme.title),
+        title: Text(isNewLog ? 'New Log' : 'Edit Log', style: Theme.of(context).textTheme.title),
         actions: [
           IconButton(
             icon: Icon(Icons.save, color: Colors.black87),
@@ -58,10 +56,17 @@ class _EditLogState extends State<EditLogPage> {
           padding: EdgeInsets.fromLTRB(lrPadding, 24.0, lrPadding, 16.0),
           child: Column(
             children: [
-              GamePickerWidget(onItemSelected: (selectedGame) => setState(() { game = selectedGame; })),
+              GamePickerWidget(onItemSelected: (selectedGame) => setState(() { 
+                game = selectedGame;
+                gameplay.game = selectedGame;
+              })),
               Padding(
                 padding:  EdgeInsets.only(top: 24.0),
-                child: PlayerList(gameplay: gamePlay),
+                child: PlayerList(
+                  gameplay: gameplay,
+                  onPlayerListChange: (changedGameplay) {
+                    gameplay = changedGameplay;
+                  }),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 24.0),
@@ -164,13 +169,17 @@ class _EditLogState extends State<EditLogPage> {
   }
   
   void saveLog() {
-    if (gamePlay.dbRef == null) {
+    gameplay.game = game;
+    gameplay.playTime = playTime;
+    gameplay.playDate = playDate;
+    
+    if (gameplay.dbRef == null) {      
       Firestore.instance.collection('gameplays').document()
-        .setData(gamePlay.serialize());
+        .setData(gameplay.serialize());
     } else {
-      gamePlay.dbRef.updateData(gamePlay.serialize());
+      gameplay.dbRef.updateData(gameplay.serialize());
     }
 
-    Navigator.pop(context, gamePlay);
+    Navigator.pop(context, gameplay);
   }
 }

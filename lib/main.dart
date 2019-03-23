@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
         Map<String, dynamic> args = settings.arguments;
         switch (settings.name) {
           case '/': return MaterialPageRoute(builder: (context) => MainAppRoutes());
-          case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gamePlay: args['gameplay']));
+          case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
           case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
           case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
           case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));

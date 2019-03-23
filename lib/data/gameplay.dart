@@ -66,13 +66,20 @@ class GamePlay {
 
   Map<String, dynamic> serialize() {
     Map<String, dynamic> data = {};
-    
     data['game'] = game.dbRef;
     data['playdate'] = playDate;
     data['playtime'] = playTime.inMinutes;
-    data['players'] = playerRefs;
     data['winners'] = winners;
+    // data['teams'] = teams;
 
+    if (playerRefs == null || (playerRefs.length == 0 && players.length > 0)) {
+      for (Player p in players) {
+        playerRefs.add(p.dbRef);
+      }
+    }
+
+    data['players'] = playerRefs;
+    
     if (scores.length > 0) {
       Map<String, int> pScores = {};
       for (String pRef in scores.keys) {
@@ -81,7 +88,7 @@ class GamePlay {
       data['scores'] = pScores;
     }
 
-    if (teams.length > 0) {
+    if (teams.keys.length > 0) {
       Map<String, List<DocumentReference>> teamRefs = {};
       for (String teamName in teams.keys) {
         List<DocumentReference> pRefs = [];
