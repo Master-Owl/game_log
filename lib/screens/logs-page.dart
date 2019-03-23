@@ -22,106 +22,85 @@ class _LogsPageState extends State<LogsPage>
   SortBy sortBy;
   List<DropdownMenuItem> sortTypes;
   List<GamePlay> gameplays;
-  bool fetchDB;
 
   @override
   void initState() {
     sortBy = SortBy.alphabetical;
     sortTypes = [];
-    gameplays = [];
-    fetchDB = true;
+    gameplays = globalGameplayList;
     for (SortBy type in SortBy.values) {
       sortTypes
           .add(DropdownMenuItem(child: Text(sortByString(type)), value: type));
     }
 
     animController = AnimationController(vsync: this, duration: animDuration);
+
+    if (gameplays.length == 0)
+      Firestore.instance.collection('gameplays').getDocuments().then(fetchGameplayData);
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     animController.forward();
+    sortGameplays();
 
     return SlideTransition(
         position: slideAnimation(animController, SlideDirection.Left),
         child: Scaffold(
-          body: Container(
+          body: SingleChildScrollView(
+            child: Container(
               padding: const EdgeInsets.only(top: headerPaddingTop),
-              child: Column(
-                children: [buildLogList(context)],
-              )),
+              child: Column(children: [
+                Padding(
+                    padding:
+                        EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
+                    child: Row(children: [
+                      Text('Log List',
+                          style: Theme.of(context).textTheme.headline),
+                      Spacer(),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Sort By',
+                                style: Theme.of(context).textTheme.subtitle),
+                            DropdownButton(
+                              value: sortBy,
+                              items: sortTypes,
+                              onChanged: (type) =>
+                                  setState(() => {sortBy = type}),
+                            )
+                          ])
+                    ])),
+                gameplays.length == 0
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 125.0),
+                        child: SizedBox(
+                            height: 100.0,
+                            width: 100.0,
+                            child: CircularProgressIndicator(value: null)))
+                    : ListView(
+                        children: getLogList(),
+                        shrinkWrap: true,
+                        itemExtent: 70.0)
+              ]),
+            ),
+          ),
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add, color: Colors.white),
             onPressed: () async {
-                  GamePlay newPlay = await Navigator.pushNamed(
-                    context, '/edit-log-page',
-                    arguments: {'gameplay': null});
-                  if (newPlay != null) {
-                    setState(() => { gameplays.add(newPlay) });
-                  }
-                },
+              GamePlay newPlay = await Navigator.pushNamed(
+                  context, '/edit-log-page',
+                  arguments: {'gameplay': null});
+              if (newPlay != null) {
+                setState(() => {gameplays.add(newPlay)});
+              }
+            },
           ),
         ));
   }
 
-  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
-  Widget buildLogList(BuildContext context) {
-    if (fetchDB) {
-      return StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance.collection('gameplays').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError)
-            return mainView(context, false, null, 'Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return mainView(context, true, null, '');
-            default:
-              return mainView(context, false, snapshot, '');
-          }
-        },
-      );
-    }
-    return mainView(context, false, null, '');
-  }
-
-  Widget mainView(BuildContext context, bool isWaiting,
-      AsyncSnapshot<QuerySnapshot> snapshot, String err) {
-    fetchDB = false;
-    if (snapshot != null) {
-      fetchGameplayData(snapshot);
-    }
-    return Column(children: [
-      Padding(
-          padding: EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
-          child: Row(children: [
-            Text('Log List', style: Theme.of(context).textTheme.headline),
-            Spacer(),
-            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Sort By', style: Theme.of(context).textTheme.subtitle),
-              DropdownButton(
-                value: sortBy,
-                items: sortTypes,
-                onChanged: (type) => setState(() => {sortBy = type}),
-              )
-            ])
-          ])),
-      isWaiting
-          ? Padding(
-              padding: EdgeInsets.only(top: 125.0),
-              child: SizedBox(
-                  height: 100.0,
-                  width: 100.0,
-                  child: CircularProgressIndicator(value: null)))
-          : err != ''
-              ? Text(err, style: Theme.of(context).textTheme.title)
-              : ListView(
-                  shrinkWrap: true, itemExtent: 70.0, children: getLogList())
-    ]);
-  }
-
-  List<Widget> getLogList() {
-    List<Widget> list = [];
+  void sortGameplays() {
     switch (sortBy) {
       case SortBy.alphabetical:
         gameplays.sort((a, b) => a.game.name.compareTo(b.game.name));
@@ -138,6 +117,10 @@ class _LogsPageState extends State<LogsPage>
       default:
         break;
     }
+  }
+
+  List<Widget> getLogList() {
+    List<Widget> list = [];
     for (GamePlay play in gameplays) {
       list.add(makeListTile(
           Text(play.game.name), Text(formatDate(play.playDate)), () async {
@@ -150,7 +133,6 @@ class _LogsPageState extends State<LogsPage>
             int idx = gameplays.indexOf(play);
             gameplays.removeAt(idx);
             gameplays.insert(idx, changedPlay);
-            fetchDB = true;
           });
           // also update the db
         }
@@ -172,9 +154,11 @@ class _LogsPageState extends State<LogsPage>
         ));
   }
 
-  void fetchGameplayData(AsyncSnapshot<QuerySnapshot> snapshot) {
+  void fetchGameplayData(QuerySnapshot snapshot) async {
     gameplays.clear();
-    snapshot.data.documents.forEach((doc) async {
+    globalGameplayList.clear();
+
+    for (DocumentSnapshot doc in snapshot.documents) {
       DocumentReference gameRef = doc.data['game'];
       List playerRefs = doc.data['players'];
       playerRefs = List<DocumentReference>.from(playerRefs);
@@ -227,14 +211,16 @@ class _LogsPageState extends State<LogsPage>
         }
       }
 
-      setState(() {
-        gameplays.add(GamePlay(game, playerRefs,
-            playTime: Duration(minutes: doc.data['playtime']),
-            playDate: doc.data['playdate'],
-            teams: teams,
-            scores: scores,
-            winners: winners));
-      });
+      globalGameplayList.add(GamePlay(game, playerRefs,
+          playTime: Duration(minutes: doc.data['playtime']),
+          playDate: doc.data['playdate'],
+          teams: teams,
+          scores: scores,
+          winners: winners));
+    }
+
+    setState((){
+      gameplays = globalGameplayList;
     });
   }
 }

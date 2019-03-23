@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/widgets/slide-transition.dart';
+import 'package:game_log/data/gameplay.dart';
+import 'package:game_log/data/player.dart';
 
 // https://medium.com/flutter-community/reactive-programming-streams-bloc-6f0d2bd2d248
 StreamController<int> tabIdxController = StreamController<int>.broadcast();
@@ -30,3 +32,5 @@ Animation<Offset> slideAnimation(AnimationController animController, SlideDirect
 }
 
 List<Game> globalGameList = [];
+List<GamePlay> globalGameplayList = [];
+List<Player> globalPlayerList = [];

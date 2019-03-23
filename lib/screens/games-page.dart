@@ -35,6 +35,10 @@ class _GamesPageState extends State<GamesPage>
     }
 
     animController = AnimationController(vsync: this, duration: animDuration);
+
+    if (games.length == 0)
+      Firestore.instance.collection('games').getDocuments().then(fetchGameData);
+
     super.initState();
   }
 
@@ -43,90 +47,60 @@ class _GamesPageState extends State<GamesPage>
     animController.forward();
 
     return SlideTransition(
-        position: slideAnimation(animController, SlideDirection.Right),
-        child: Scaffold(
-          body: Container(
-              padding: const EdgeInsets.only(top: headerPaddingTop),
-              child: buildLogList(context),
-            ),
-          floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.add, color: Colors.white),
-            onPressed: () async {
-              Game newGame = await Navigator.pushNamed(
-                  context, '/edit-game-page',
-                  arguments: {'game': null});
-              if (newGame != null) {
-                setState(() {
-                 games.add(newGame);
-                });
-              }
-            },
-          ),
-        ));
-  }
-
-  // https://pub.dartlang.org/packages/cloud_firestore#-readme-tab-
-  Widget buildLogList(BuildContext context) {
-    if (fetchDB) {
-      return StreamBuilder<QuerySnapshot>(
-        stream: Firestore.instance.collection('games').snapshots(),
-        builder: (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
-          if (snapshot.hasError)
-            return mainView(context, null, 'Error: ${snapshot.error}');
-          switch (snapshot.connectionState) {
-            case ConnectionState.waiting:
-              return mainView(context, null, '');
-            default:
-              return mainView(context, snapshot, '');
-          }
-        },
-      );
-    }
-    return mainView(context, null, '');
-  }
-
-  Widget mainView(BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot, String err) {
-    fetchDB = false;
-    if (snapshot != null) {
-      fetchGameData(snapshot);
-    }
-    return Column(children: [
-      Padding(
-        padding: EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
-        child: Row(children: [
-          Text('Game List', style: Theme.of(context).textTheme.headline),
-          Spacer(),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start, 
-            children: [
-              Text('Sort By', style: Theme.of(context).textTheme.subtitle),
-              DropdownButton(
-                value: sortBy,
-                items: sortTypes,
-                onChanged: (type) => setState(() => {sortBy = type}),
-              )
-            ]
+      position: slideAnimation(animController, SlideDirection.Right),
+      child: Scaffold(
+        body: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.only(top: headerPaddingTop),
+            child: Column(children: [
+              Padding(
+                  padding:
+                      EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
+                  child: Row(children: [
+                    Text('Game List',
+                        style: Theme.of(context).textTheme.headline),
+                    Spacer(),
+                    Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Sort By',
+                              style: Theme.of(context).textTheme.subtitle),
+                          DropdownButton(
+                            value: sortBy,
+                            items: sortTypes,
+                            onChanged: (type) =>
+                                setState(() => {sortBy = type}),
+                          )
+                        ])
+                  ])),
+              games.length == 0
+                  ? Padding(
+                      padding: EdgeInsets.only(top: 125.0),
+                      child: SizedBox(
+                          height: 100.0,
+                          width: 100.0,
+                          child: CircularProgressIndicator(value: null)))
+                  : ListView(
+                      shrinkWrap: true,
+                      itemExtent: 50.0,
+                      children: getLogList())
+            ]),
           )
-        ])
-      ),
-      games.length == 0
-          ? Padding(
-              padding: EdgeInsets.only(top: 125.0),
-              child: SizedBox(
-                height: 100.0,
-                width: 100.0,
-                child: CircularProgressIndicator(value: null)
-              )
-            )
-          : err != ''
-              ? Text(err, style: Theme.of(context).textTheme.title)
-              : ListView(
-                  shrinkWrap: true, 
-                  itemExtent: 50.0, 
-                  children: getLogList()
-                )
-      ]
-    );
+        ),
+        floatingActionButton: FloatingActionButton(
+          child: Icon(Icons.add, color: Colors.white),
+          onPressed: () async {
+            Game newGame = await Navigator.pushNamed(
+                context, '/edit-game-page',
+                arguments: {'game': null});
+            if (newGame != null) {
+              setState(() {
+                games.add(newGame);
+              });
+            }
+          },
+        ),
+      ));
   }
 
   List<Widget> getLogList() {
@@ -142,26 +116,23 @@ class _GamesPageState extends State<GamesPage>
         break;
     }
     for (Game game in games) {
-      list.add(makeListTile(
-        Text(game.name),
-        () async {
-          Game modifiedGame = await Navigator.pushNamed(
+      list.add(makeListTile(Text(game.name), () async {
+        Game modifiedGame = await Navigator.pushNamed(
             context, '/edit-game-page',
-            arguments: {'game': game}
-          );
+            arguments: {'game': game});
 
-          if (modifiedGame != null && modifiedGame != game) {
-            setState(() {
-              int idx = games.indexOf(game);
-              games.removeAt(idx);
-              games.insert(idx, modifiedGame);
+        if (modifiedGame != null && modifiedGame != game) {
+          setState(() {
+            int idx = games.indexOf(game);
+            games.removeAt(idx);
+            games.insert(idx, modifiedGame);
 
-              idx =globalGameList.indexOf(game);
-              globalGameList.removeAt(idx);
-              globalGameList.insert(idx, modifiedGame);
-              // fetchDB = true;
-            });            
-          }
+            idx = globalGameList.indexOf(game);
+            globalGameList.removeAt(idx);
+            globalGameList.insert(idx, modifiedGame);
+            // fetchDB = true;
+          });
+        }
       }));
     }
     return list;
@@ -179,33 +150,37 @@ class _GamesPageState extends State<GamesPage>
         ));
   }
 
-  void fetchGameData(AsyncSnapshot<QuerySnapshot> snapshot) async {
+  void fetchGameData(QuerySnapshot snapshot) {
     games.clear();
     globalGameList.clear();
 
-    // List<Future> 
-    for (DocumentSnapshot gameRef in snapshot.data.documents) {      
+    // List<Future>
+    for (DocumentSnapshot gameRef in snapshot.documents) {
       String name = gameRef.data['name'];
-      GameType type =gameTypeFromString(gameRef.data['type']);
-      WinConditions condition =winConditionFromString(gameRef.data['wincondition']);
+      GameType type = gameTypeFromString(gameRef.data['type']);
+      WinConditions condition =
+          winConditionFromString(gameRef.data['wincondition']);
       int bggId = gameRef.data['bggid'];
       DocumentReference dbRef = gameRef.reference;
-            
+
       globalGameList.add(Game(
-        name: name,
-        bggId: bggId,
-        condition: condition,
-        type: type,
-        dbRef: dbRef
-      ));      
+          name: name,
+          bggId: bggId,
+          condition: condition,
+          type: type,
+          dbRef: dbRef));
     }
+
     setState(() {
-     games = globalGameList; 
+      games = globalGameList;
     });
   }
 }
 
-enum SortGamesBy { alphabetical_ascending, alphabetical_descending,/* most_played, most_won */}
+enum SortGamesBy {
+  alphabetical_ascending,
+  alphabetical_descending, /* most_played, most_won */
+}
 String sortByString(SortGamesBy sort) {
   switch (sort) {
     case SortGamesBy.alphabetical_ascending:
