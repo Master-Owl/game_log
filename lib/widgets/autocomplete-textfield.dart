@@ -22,12 +22,12 @@ class AutoCompleteTextField<T> extends StatefulWidget {
   Comparator<T> itemSorter;
   StringCallback textChanged, textSubmitted;
   InputEventCallback<T> itemSubmitted;
-  AutoCompleteOverlayItemBuilder<T> itemBuilder;
+  AutoCompleteOverlayItemBuilder<T> itemBuilder, itemNotFoundBuilder;
   int suggestionsAmount;
   GlobalKey<AutoCompleteTextFieldState<T>> key;
   bool submitOnSuggestionTap, clearOnSubmit;
   List<TextInputFormatter> inputFormatters;
-  FocusNode focusNode;
+  FocusNode focusNode;  
 
   InputDecoration decoration;
   TextStyle style;
@@ -48,6 +48,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
           this.itemSorter, //Callback to sort items in the form (a of type <T>, b of type <T>)
       @required
           this.itemFilter, //Callback to filter item: return true or false depending on input text
+      this.itemNotFoundBuilder,
       this.inputFormatters,
       this.style,
       this.decoration: const InputDecoration(),
@@ -89,6 +90,7 @@ class AutoCompleteTextField<T> extends StatefulWidget {
       textSubmitted,
       itemSubmitted,
       itemBuilder,
+      itemNotFoundBuilder,
       itemSorter,
       itemFilter,
       suggestionsAmount,
@@ -108,13 +110,13 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
   List<T> suggestions;
   StringCallback textChanged, textSubmitted;
   InputEventCallback<T> itemSubmitted;
-  AutoCompleteOverlayItemBuilder<T> itemBuilder;
+  AutoCompleteOverlayItemBuilder<T> itemBuilder, itemNotFoundBuilder;
   Comparator<T> itemSorter;
   OverlayEntry listSuggestionsEntry;
   List<T> filteredSuggestions;
   Filter<T> itemFilter;
   int suggestionsAmount;
-  bool submitOnSuggestionTap, clearOnSubmit;
+  bool submitOnSuggestionTap, clearOnSubmit, noItemsFound;
   FocusNode focusNode;
 
   String currentText = "";
@@ -125,6 +127,7 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       this.textSubmitted,
       this.itemSubmitted,
       this.itemBuilder,
+      this.itemNotFoundBuilder,
       this.itemSorter,
       this.itemFilter,
       this.suggestionsAmount,
@@ -137,7 +140,11 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
       TextStyle style,
       TextInputType keyboardType,
       TextInputAction textInputAction) {
-        if (focusNode == null) focusNode = new FocusNode();
+        if (focusNode == null) {
+          focusNode = new FocusNode();
+        }
+        noItemsFound = false;
+
     textField = new TextField(
       inputFormatters: inputFormatters,
       textCapitalization: textCapitalization,
@@ -219,7 +226,9 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                 width: width,
                 child: new Card(
                     child: new Column(
-                  children: filteredSuggestions.map((suggestion) {
+                  children: noItemsFound ? 
+                    [ itemNotFoundBuilder(context, null) ] :
+                    filteredSuggestions.map((suggestion) {
                     return new Row(children: [
                       new Expanded(
                           child: new InkWell(
@@ -240,17 +249,19 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
                                     textChanged(newText);
                                   }
                                 });
-                              }))
+                              }
+                            )
+                          )
                     ]);
                   }).toList(),
                 ))));
       });
       Overlay.of(context).insert(listSuggestionsEntry);
     }
-
+    
     filteredSuggestions = getSuggestions(
         suggestions, itemSorter, itemFilter, suggestionsAmount, query);
-
+    
     listSuggestionsEntry.markNeedsBuild();
   }
 
@@ -265,9 +276,15 @@ class AutoCompleteTextFieldState<T> extends State<AutoCompleteTextField> {
     if (suggestions.length > maxAmount) {
       suggestions = suggestions.sublist(0, maxAmount);
     }
+
+    if (suggestions.length == 0 && itemNotFoundBuilder != null) {      
+      noItemsFound = true;
+    } else {
+      noItemsFound = false;
+    }
     return suggestions;
   }
-
+  
   @override
   Widget build(BuildContext context) {
     return textField;
@@ -300,6 +317,7 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
             key: key,
             suggestions: suggestions,
             itemBuilder: null,
+            itemNotFoundBuilder: null,
             itemSorter: null,
             itemFilter: null,
             suggestionsAmount: suggestionsAmount,
@@ -310,7 +328,7 @@ class SimpleAutoCompleteTextField extends AutoCompleteTextField<String> {
 
   @override
   State<StatefulWidget> createState() => new AutoCompleteTextFieldState<String>(
-          suggestions, textChanged, textSubmitted, itemSubmitted,
+          suggestions, textChanged, textSubmitted, itemSubmitted, null,
           (context, item) {
         return new Padding(padding: EdgeInsets.all(8.0), child: new Text(item));
       }, (a, b) {

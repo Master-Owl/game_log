@@ -69,6 +69,11 @@ class _GamePickerState extends State<GamePickerWidget> {
                   padding: EdgeInsets.all(6.0),
                   child: ListTile(title: Text(game.name)));
             },
+            itemNotFoundBuilder: (context, game) {
+              return Padding(
+                padding:EdgeInsets.all(6.0),
+                child: ListTile(title: Text('Game Not Found in Your Collection')));
+            },
           )
         : TextField(
             decoration: decoration,
