@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitUp
     ]);
     return new MaterialApp(
-      title: 'GameLog',
+      title: 'TBGF: GameLog',
       theme: new ThemeData(
         primarySwatch: MaterialColor(0xFF6FCF97,
             {

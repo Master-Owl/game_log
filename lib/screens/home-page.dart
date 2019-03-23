@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 
+
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
 
@@ -21,12 +22,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   AnimationController animController;
   bool _firstLoad;
+  IconData gameIcon;
 
   @override
   void initState() {
     super.initState();
     animController = AnimationController(vsync: this, duration: animDuration);
     _firstLoad = true;
+    gameIcon = const IconData(0xe9e9, fontFamily: 'icomoon');
   }
 
   @override
@@ -87,7 +90,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     cards.add(Card(
         color: theme.accentColor,
         child: InkWell(
-            child: Icon(Icons.developer_board, color: Colors.white, size: 80.0),
+            child: Icon(gameIcon, color: Colors.white, size: 80.0),
             onTap: _addGame)));
 
     cards.add(Card(
