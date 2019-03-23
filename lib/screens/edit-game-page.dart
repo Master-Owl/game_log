@@ -129,7 +129,7 @@ class _EditGameState extends State<EditGamePage> {
       if (game.dbRef == null) Firestore.instance.collection('games').document().setData(obj);
       else Firestore.instance.collection('games').document(game.dbRef.documentID).updateData(obj);
 
-      Navigator.pop(context);
+      Navigator.pop(context, game);
     } else {
       showDialog(
         context: context,        

@@ -29,7 +29,11 @@ class _PlayerListState extends State<PlayerList> {
   void initState() {
     if (gameplay == null) gameplay = GamePlay(Game(), null);
     players = gameplay.players;
-    gameType = gameplay.game.type;
+    if (gameplay.game == null) {
+      gameType = GameType.standard;
+    } else {
+      gameType = gameplay.game.type;
+    }
     allSavedPlayers = [];
     teams = [];
     teamColors = [];

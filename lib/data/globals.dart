@@ -1,7 +1,7 @@
 library game_log.globals;
 import 'dart:async';
 import 'package:flutter/material.dart';
-import './player.dart';
+import 'package:game_log/data/game.dart';
 import 'package:game_log/widgets/slide-transition.dart';
 
 // https://medium.com/flutter-community/reactive-programming-streams-bloc-6f0d2bd2d248
@@ -29,11 +29,4 @@ Animation<Offset> slideAnimation(AnimationController animController, SlideDirect
     end: Offset.zero).animate(CurvedAnimation(curve: Curves.ease, parent: animController));
 }
 
-List<Player> mockPlayerData = [
-  Player(name: 'Trent', color: Colors.red[400]),
-  Player(name: 'Michelle', color: Colors.yellow[600]),
-  Player(name: 'Trevor', color: Colors.green[400]),
-  Player(name: 'Jaden', color: Colors.orange[400]),
-  Player(name: 'Brooke', color: Colors.purple[400]),
-  Player(name: 'Caleb', color: Colors.teal[200]),
-];
+List<Game> globalGameList = [];

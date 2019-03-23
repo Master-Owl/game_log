@@ -7,7 +7,6 @@ import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:swipedetector/swipedetector.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key:key);
@@ -53,81 +52,78 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     animController.forward();
 
     return Scaffold(
-      body: SwipeDetector(
-        child: Container(
-          padding: EdgeInsets.only(left:lrPadding, right:lrPadding, top:headerPaddingTop),
-          child: FadeTransition(
-            opacity: anim,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: Text(gameplay.game.name, style: headline)
-                ),
-                Padding(
-                  padding:EdgeInsets.only(top: 36.0),
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Played On: ',
-                      style: title,
-                      children: [
-                        TextSpan(
-                          text: formatDate(gameplay.playDate),
-                          style: datetime
-                        )
-                      ]
-                    )
-                  )
-                ),
-                Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: RichText(
-                    text: TextSpan(
-                      text: 'Play Time: ',
-                      style: title,
-                      children: [
-                        TextSpan(
-                          text: formatTimeDuration(gameplay.playTime), 
-                          style: datetime
-                        ),
-                      ],
-                    ),
-                  )
-                ),
-                Padding(
-                  padding:EdgeInsets.only(top: 24.0),
-                  child: Text(playersTitle, style: title)
-                ),
-                playersWidget,
-                Padding(
-                  padding:EdgeInsets.only(top: 26.0),
-                  child: Center(
-                    child: RaisedButton(
-                      child: Text('Edit Log', style: Theme.of(context).textTheme.button),
-                      padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
-                      color: Theme.of(context).accentColor,
-                      onPressed: () async {
-                        GamePlay changed = await Navigator.pushNamed(
-                          context, 
-                          '/edit-log-page',
-                          arguments: {
-                            'gameplay':gameplay
-                          }
-                        );
-                        if (changed != null && changed != gameplay) {
-                          print('changed');
-                          setState(() => { gameplay = changed });
-                        }
-                        print('done');
-                      },
-                    )
+      body: Container(
+        padding: EdgeInsets.only(left:lrPadding, right:lrPadding, top:headerPaddingTop),
+        child: FadeTransition(
+          opacity: anim,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Text(gameplay.game.name, style: headline)
+              ),
+              Padding(
+                padding:EdgeInsets.only(top: 36.0),
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Played On: ',
+                    style: title,
+                    children: [
+                      TextSpan(
+                        text: formatDate(gameplay.playDate),
+                        style: datetime
+                      )
+                    ]
                   )
                 )
-              ]
-            )
+              ),
+              Padding(
+                padding: EdgeInsets.only(top: 8.0),
+                child: RichText(
+                  text: TextSpan(
+                    text: 'Play Time: ',
+                    style: title,
+                    children: [
+                      TextSpan(
+                        text: formatTimeDuration(gameplay.playTime), 
+                        style: datetime
+                      ),
+                    ],
+                  ),
+                )
+              ),
+              Padding(
+                padding:EdgeInsets.only(top: 24.0),
+                child: Text(playersTitle, style: title)
+              ),
+              playersWidget,
+              Padding(
+                padding:EdgeInsets.only(top: 26.0),
+                child: Center(
+                  child: RaisedButton(
+                    child: Text('Edit Log', style: Theme.of(context).textTheme.button),
+                    padding:EdgeInsets.fromLTRB(24.0, 8.0, 24.0, 8.0),
+                    color: Theme.of(context).accentColor,
+                    onPressed: () async {
+                      GamePlay changed = await Navigator.pushNamed(
+                        context, 
+                        '/edit-log-page',
+                        arguments: {
+                          'gameplay':gameplay
+                        }
+                      );
+                      if (changed != null && changed != gameplay) {
+                        print('changed');
+                        setState(() => { gameplay = changed });
+                      }
+                      print('done');
+                    },
+                  )
+                )
+              )
+            ]
           )
-        ),
-        onSwipeRight: () => { Navigator.pop(context, gameplay) },
+        )
       )
     );
   }

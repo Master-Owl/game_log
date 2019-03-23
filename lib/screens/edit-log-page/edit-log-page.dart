@@ -6,6 +6,7 @@ import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/widgets/game-picker-widget.dart';
 import './player-list.dart';
 
 class EditLogPage extends StatefulWidget {
@@ -23,6 +24,7 @@ class _EditLogState extends State<EditLogPage> {
   GamePlay gamePlay;
   bool isNewLog = false;
   String appBarTitle = '';
+  Game game;
   DateTime playDate;
   Duration playTime;
 
@@ -34,17 +36,18 @@ class _EditLogState extends State<EditLogPage> {
     if (isNewLog) gamePlay = new GamePlay(Game(), []);
     playDate = gamePlay.playDate;
     playTime = gamePlay.playTime;
+    game = isNewLog ? null : gamePlay.game;
     super.initState();
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {     
     return Scaffold(
       appBar: AppBar(
         title: Text(appBarTitle, style: Theme.of(context).textTheme.title),
         actions: [
           IconButton(
-            icon: Icon(Icons.save),
+            icon: Icon(Icons.save, color: Colors.black87),
             tooltip: 'Save',
             onPressed: saveLog
           )
@@ -55,11 +58,7 @@ class _EditLogState extends State<EditLogPage> {
           padding: EdgeInsets.fromLTRB(lrPadding, 24.0, lrPadding, 16.0),
           child: Column(
             children: [
-              AppTextField(
-                controller: TextEditingController(text: gamePlay.game.name),
-                onChanged: (str) => { gamePlay.game.name = str },
-                label: 'Game Title',
-              ),
+              GamePickerWidget(onItemSelected: (selectedGame) => setState(() { game = selectedGame; })),
               Padding(
                 padding:  EdgeInsets.only(top: 24.0),
                 child: PlayerList(gameplay: gamePlay),

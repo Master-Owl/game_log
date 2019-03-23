@@ -27,8 +27,8 @@ class _GamesPageState extends State<GamesPage>
   void initState() {
     sortBy = SortGamesBy.alphabetical_ascending;
     sortTypes = [];
-    games = [];
-    fetchDB = true;
+    games = globalGameList;
+    fetchDB = games.length == 0;
     for (SortGamesBy type in SortGamesBy.values) {
       sortTypes
           .add(DropdownMenuItem(child: Text(sortByString(type)), value: type));
@@ -47,15 +47,20 @@ class _GamesPageState extends State<GamesPage>
         child: Scaffold(
           body: Container(
               padding: const EdgeInsets.only(top: headerPaddingTop),
-              child: Column(
-                children: [buildLogList(context)],
-              )),
+              child: buildLogList(context),
+            ),
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add, color: Colors.white),
-            onPressed: () => {
-                  Navigator.pushNamed(context, '/edit-game-page',
-                      arguments: {'game': null})
-                },
+            onPressed: () async {
+              Game newGame = await Navigator.pushNamed(
+                  context, '/edit-game-page',
+                  arguments: {'game': null});
+              if (newGame != null) {
+                setState(() {
+                 games.add(newGame);
+                });
+              }
+            },
           ),
         ));
   }
@@ -117,7 +122,7 @@ class _GamesPageState extends State<GamesPage>
               ? Text(err, style: Theme.of(context).textTheme.title)
               : ListView(
                   shrinkWrap: true, 
-                  itemExtent: 70.0, 
+                  itemExtent: 50.0, 
                   children: getLogList()
                 )
       ]
@@ -141,7 +146,7 @@ class _GamesPageState extends State<GamesPage>
         Text(game.name),
         () async {
           Game modifiedGame = await Navigator.pushNamed(
-            context, '/view-game-page',
+            context, '/edit-game-page',
             arguments: {'game': game}
           );
 
@@ -150,7 +155,11 @@ class _GamesPageState extends State<GamesPage>
               int idx = games.indexOf(game);
               games.removeAt(idx);
               games.insert(idx, modifiedGame);
-              fetchDB = true;
+
+              idx =globalGameList.indexOf(game);
+              globalGameList.removeAt(idx);
+              globalGameList.insert(idx, modifiedGame);
+              // fetchDB = true;
             });            
           }
       }));
@@ -172,7 +181,8 @@ class _GamesPageState extends State<GamesPage>
 
   void fetchGameData(AsyncSnapshot<QuerySnapshot> snapshot) async {
     games.clear();
-    List<Game> tempLst = [];
+    globalGameList.clear();
+
     // List<Future> 
     for (DocumentSnapshot gameRef in snapshot.data.documents) {      
       String name = gameRef.data['name'];
@@ -181,7 +191,7 @@ class _GamesPageState extends State<GamesPage>
       int bggId = gameRef.data['bggid'];
       DocumentReference dbRef = gameRef.reference;
             
-      tempLst.add(Game(
+      globalGameList.add(Game(
         name: name,
         bggId: bggId,
         condition: condition,
@@ -190,7 +200,7 @@ class _GamesPageState extends State<GamesPage>
       ));      
     }
     setState(() {
-     games = tempLst; 
+     games = globalGameList; 
     });
   }
 }
