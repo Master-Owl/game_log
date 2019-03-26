@@ -5,8 +5,6 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
-import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key:key);
@@ -20,14 +18,12 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
   _ViewLogState(this.gameplay);
 
   GamePlay gameplay;
-  List<Player> players;
   AnimationController animController;
   Animation<double> anim;
 
   @override
   void initState() {
     super.initState();
-    players = [];
     animController = AnimationController(vsync: this, duration: animDuration);
     anim = Tween(begin: 0.0, end: 1.0).animate(animController);
     fetchPlayers();
@@ -40,7 +36,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     TextStyle datetime = TextStyle(fontWeight: FontWeight.w500, fontSize: 22.0, color: defaultGray);
     String playersTitle = gameplay.game.type == GameType.team ? 'Teams' : 'Players';
 
-    Widget playersWidget = players.length > 0 ? 
+    Widget playersWidget = gameplay.players.length > 0 ? 
       ListView(
         padding: EdgeInsets.only(left: 10.0, top: 6.0),
         itemExtent: 45.0,
@@ -59,8 +55,25 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Center(
-                child: Text(gameplay.game.name, style: headline)
+              Row(
+                children: [                  
+                  Expanded(
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: headline.color,
+                      ), 
+                      iconSize: headline.fontSize - 10.0,
+                      onPressed: () => { Navigator.pop(context, gameplay) },
+                    ),
+                    flex: 1
+                  ),
+                  Spacer(flex: 2),
+                  Center(
+                    child: Text(gameplay.game.name, style: headline),
+                  ),
+                  Spacer(flex: 3)
+                ]
               ),
               Padding(
                 padding:EdgeInsets.only(top: 36.0),
@@ -113,10 +126,8 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                         }
                       );
                       if (changed != null && changed != gameplay) {
-                        print('changed');
                         setState(() => { gameplay = changed });
                       }
-                      print('done');
                     },
                   )
                 )
@@ -141,7 +152,7 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
     colors.shuffle();
     Map<String, Color> teamColors = {};
 
-    for (Player player in players) {
+    for (Player player in gameplay.players) {
       Color tileColor;
       Widget appendedWidget = Container();
 
@@ -225,29 +236,9 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
   }
 
   void fetchPlayers() async {
-    List<DocumentReference> pRefs = gameplay.playerRefs;
-    List<Future> futures = [];
-    List<Player> fetchedPlayers = [];
-
-    pRefs.forEach((ref) {
-      futures.add(
-        ref.get().then((snapshot) => {
-          fetchedPlayers.add(
-            Player(
-              dbRef: ref, 
-              name: snapshot.data['name'], 
-              color: Color(snapshot.data['color'])
-            )
-          )
-        })
-      );
-    });
-
-    await Future.wait(futures);
-
-    setState(() {
-      players = fetchedPlayers;
-      gameplay.players = players;
+    List<Player> fetchedPlayers = await getPlayersFromRefs(gameplay.playerRefs);
+    setState(() {      
+      gameplay.players = fetchedPlayers;
     });
   }
 }

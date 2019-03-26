@@ -5,6 +5,7 @@ import 'package:game_log/data/game.dart';
 import 'package:game_log/widgets/slide-transition.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/player.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 // https://medium.com/flutter-community/reactive-programming-streams-bloc-6f0d2bd2d248
 StreamController<int> tabIdxController = StreamController<int>.broadcast();
@@ -34,3 +35,30 @@ Animation<Offset> slideAnimation(AnimationController animController, SlideDirect
 List<Game> globalGameList = [];
 List<GamePlay> globalGameplayList = [];
 List<Player> globalPlayerList = [];
+
+Future<List<Player>> getPlayersFromRefs(List<DocumentReference> pRefs) async {
+  List<Player> players = [];
+  for (DocumentReference ref in pRefs) {
+    bool found = false;
+    for (Player p in globalPlayerList) {
+      if (p.dbRef == ref) {
+        players.add(p);
+        found = true;
+        break;
+      }
+    }
+
+    if (!found) {
+      DocumentSnapshot snapshot = await ref.get();
+      Player newPlayer = Player(
+        name:snapshot.data['name'],
+        color: Color(snapshot.data['color']),
+        dbRef: ref        
+      );
+      globalPlayerList.add(newPlayer);
+      players.add(newPlayer);
+    }
+  }
+
+  return players;
+}

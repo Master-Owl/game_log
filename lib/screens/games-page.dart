@@ -49,43 +49,45 @@ class _GamesPageState extends State<GamesPage>
     return SlideTransition(
       position: slideAnimation(animController, SlideDirection.Right),
       child: Scaffold(
-        body: SingleChildScrollView(
-          child: Container(
+        body: Container(
             padding: const EdgeInsets.only(top: headerPaddingTop),
-            child: Column(children: [
-              Padding(
-                  padding:
-                      EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
-                  child: Row(children: [
-                    Text('Game List',
-                        style: Theme.of(context).textTheme.headline),
-                    Spacer(),
-                    Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Sort By',
-                              style: Theme.of(context).textTheme.subtitle),
-                          DropdownButton(
-                            value: sortBy,
-                            items: sortTypes,
-                            onChanged: (type) =>
-                                setState(() => {sortBy = type}),
-                          )
-                        ])
-                  ])),
-              games.length == 0
+            child: Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
+                  child: Row(
+                    children: [
+                      Text('Game List',
+                          style: Theme.of(context).textTheme.headline),
+                      Spacer(),
+                      Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Sort By',
+                                style: Theme.of(context).textTheme.subtitle),
+                            DropdownButton(
+                              value: sortBy,
+                              items: sortTypes,
+                              onChanged: (type) =>
+                                  setState(() => {sortBy = type}),
+                            )
+                          ])
+                    ])
+                ),
+                games.length == 0
                   ? Padding(
                       padding: EdgeInsets.only(top: 125.0),
                       child: SizedBox(
                           height: 100.0,
                           width: 100.0,
                           child: CircularProgressIndicator(value: null)))
-                  : ListView(
-                      shrinkWrap: true,
-                      itemExtent: 50.0,
-                      children: getLogList())
-            ]),
-          )
+                  : Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        itemExtent: 50.0,
+                        children: getLogList())
+                  )
+            ]),          
         ),
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add, color: Colors.white),

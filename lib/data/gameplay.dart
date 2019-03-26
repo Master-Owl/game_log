@@ -70,7 +70,6 @@ class GamePlay {
     data['playdate'] = playDate;
     data['playtime'] = playTime.inMinutes;
     data['winners'] = winners;
-    // data['teams'] = teams;
 
     if (playerRefs == null || (playerRefs.length == 0 && players.length > 0)) {
       for (Player p in players) {
@@ -81,7 +80,7 @@ class GamePlay {
     data['players'] = playerRefs;
     
     if (scores.length > 0) {
-      Map<String, int> pScores = {};
+      Map<dynamic, dynamic> pScores = {};
       for (String pRef in scores.keys) {
         pScores[pRef] = scores[pRef];
       }
@@ -89,7 +88,7 @@ class GamePlay {
     }
 
     if (teams.keys.length > 0) {
-      Map<String, List<DocumentReference>> teamRefs = {};
+      Map<dynamic, dynamic> teamRefs = {};
       for (String teamName in teams.keys) {
         List<DocumentReference> pRefs = [];
         for (DocumentReference p in teams[teamName]) {

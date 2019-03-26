@@ -64,9 +64,9 @@ class _EditLogState extends State<EditLogPage> {
                 padding:  EdgeInsets.only(top: 24.0),
                 child: PlayerList(
                   gameplay: gameplay,
-                  onPlayerListChange: (changedGameplay) {
+                  onPlayerListChange: (changedGameplay) => setState((){
                     gameplay = changedGameplay;
-                  }),
+                  })),
               ),
               Padding(
                 padding: EdgeInsets.only(top: 24.0),

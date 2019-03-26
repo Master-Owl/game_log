@@ -36,7 +36,10 @@ class _LogsPageState extends State<LogsPage>
     animController = AnimationController(vsync: this, duration: animDuration);
 
     if (gameplays.length == 0)
-      Firestore.instance.collection('gameplays').getDocuments().then(fetchGameplayData);
+      Firestore.instance
+          .collection('gameplays')
+          .getDocuments()
+          .then(fetchGameplayData);
     super.initState();
   }
 
@@ -48,14 +51,14 @@ class _LogsPageState extends State<LogsPage>
     return SlideTransition(
         position: slideAnimation(animController, SlideDirection.Left),
         child: Scaffold(
-          body: SingleChildScrollView(
-            child: Container(
-              padding: const EdgeInsets.only(top: headerPaddingTop),
-              child: Column(children: [
+          body: Container(
+            padding: EdgeInsets.only(top: headerPaddingTop),
+            child: Column(
+              children: [
                 Padding(
-                    padding:
-                        EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
-                    child: Row(children: [
+                  padding: EdgeInsets.only(left: lrPadding, right: lrPadding * 2),
+                  child: Row(
+                    children: [
                       Text('Log List',
                           style: Theme.of(context).textTheme.headline),
                       Spacer(),
@@ -70,21 +73,25 @@ class _LogsPageState extends State<LogsPage>
                               onChanged: (type) =>
                                   setState(() => {sortBy = type}),
                             )
-                          ])
-                    ])),
+                          ]
+                      )
+                  ])
+                ),
                 gameplays.length == 0
-                    ? Padding(
-                        padding: EdgeInsets.only(top: 125.0),
-                        child: SizedBox(
-                            height: 100.0,
-                            width: 100.0,
-                            child: CircularProgressIndicator(value: null)))
-                    : ListView(
-                        children: getLogList(),
-                        shrinkWrap: true,
-                        itemExtent: 70.0)
-              ]),
-            ),
+                  ? Padding(
+                      padding: EdgeInsets.only(top: 125.0),
+                      child: SizedBox(
+                          height: 100.0,
+                          width: 100.0,
+                          child: CircularProgressIndicator(value: null))
+                    )
+                  : Expanded(
+                      child: ListView(
+                          children: getLogList(),
+                          shrinkWrap: true,
+                          itemExtent: 70.0)
+                    )
+            ]),
           ),
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add, color: Colors.white),
@@ -123,18 +130,18 @@ class _LogsPageState extends State<LogsPage>
     List<Widget> list = [];
     for (GamePlay play in gameplays) {
       list.add(makeListTile(
-          Text(play.game.name), Text(formatDate(play.playDate)), () async {
-        GamePlay changedPlay = await Navigator.pushNamed(
-            context, '/view-log-page',
-            arguments: {'gameplay': play});
+          Text(play.game.name), Text(formatDate(play.playDate)), 
+          () async {
+            GamePlay changedPlay = await Navigator.pushNamed(
+                context, '/view-log-page',
+                arguments: {'gameplay': play});
 
-        if (changedPlay != null && changedPlay != play) {
-          setState(() {
-            int idx = gameplays.indexOf(play);
-            gameplays.removeAt(idx);
-            gameplays.insert(idx, changedPlay);
-          });
-          // also update the db
+            if (changedPlay != null && changedPlay != play) {
+              setState(() {
+                int idx = gameplays.indexOf(play);
+                gameplays.removeAt(idx);
+                gameplays.insert(idx, changedPlay);
+              });
         }
       }));
     }
@@ -219,7 +226,7 @@ class _LogsPageState extends State<LogsPage>
           winners: winners));
     }
 
-    setState((){
+    setState(() {
       gameplays = globalGameplayList;
     });
   }

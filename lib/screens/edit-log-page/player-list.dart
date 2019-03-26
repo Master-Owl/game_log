@@ -31,7 +31,7 @@ class _PlayerListState extends State<PlayerList> {
   void initState() {
     if (gameplay == null) gameplay = GamePlay(Game(), null);
     players = gameplay.players;
-    allSavedPlayers = [];
+    allSavedPlayers = globalPlayerList;
     teams = [];
     teamColors = [];
     for (List<DocumentReference> teamList in gameplay.teams.values) {
@@ -51,21 +51,22 @@ class _PlayerListState extends State<PlayerList> {
       teamColors.add(getRandomColor());
     }
 
-    Firestore.instance.collection('players')
-      .getDocuments()
-      .then((snapshot) {
-        List<Player> dbPlayers = [];
-        snapshot.documents.forEach((doc) {
-          dbPlayers.add(Player(
-            name: doc.data['name'],
-            color: Color(doc.data['color']),
-            dbRef: doc.reference
-          ));
+    if (allSavedPlayers.length == 0)
+      Firestore.instance.collection('players')
+        .getDocuments()
+        .then((snapshot) {
+          List<Player> dbPlayers = [];
+          snapshot.documents.forEach((doc) {
+            dbPlayers.add(Player(
+              name: doc.data['name'],
+              color: Color(doc.data['color']),
+              dbRef: doc.reference
+            ));
+          });
+          setState(() {
+            allSavedPlayers = dbPlayers; 
+          });
         });
-        setState(() {
-          allSavedPlayers = dbPlayers; 
-        });
-      });
       
     super.initState();
   }
@@ -113,7 +114,8 @@ class _PlayerListState extends State<PlayerList> {
                 icon: Icon(gameType == GameType.team ? 
                   Icons.group_add : 
                   Icons.add, 
-                  color: accent),                
+                  color: accent
+                ),
                 onPressed: onPlusPressed()
               )
             ]
@@ -169,6 +171,9 @@ class _PlayerListState extends State<PlayerList> {
                 if (player != null) setState(() {
                   teams[i].add(player);
                   players.add(player);
+                  gameplay.players = players;
+                  gameplay.teams = getTeams(teams);
+                  onPlayerListChange(gameplay);
                 });
               }
             ),
@@ -321,6 +326,8 @@ class _PlayerListState extends State<PlayerList> {
       teams.add([]);
       if (teams.length > teamColors.length) 
         teamColors.add(getRandomColor());
+      gameplay.teams = getTeams(teams);
+      onPlayerListChange(gameplay);
     });
   }
 
