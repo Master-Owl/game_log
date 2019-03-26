@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/edit-log-page/edit-log-page.dart';
 import 'package:game_log/screens/edit-game-page.dart';
@@ -24,6 +25,9 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp
     ]);
+
+    _getAllPlayers();
+
     return new MaterialApp(
       title: 'TBGF: GameLog',
       theme: new ThemeData(
@@ -74,10 +78,22 @@ class MyApp extends StatelessWidget {
           case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());
         }
       },
-      onUnknownRoute: (settings) {
-        
-      },
-
     );
+  }
+
+  void _getAllPlayers() {
+    Firestore.instance.collection('players')
+      .getDocuments()
+      .then((snapshot) {
+        List<Player> dbPlayers = [];
+        snapshot.documents.forEach((doc) {
+          dbPlayers.add(Player(
+            name: doc.data['name'],
+            color: Color(doc.data['color']),
+            dbRef: doc.reference
+          ));
+        });
+        globalPlayerList = dbPlayers;
+      });
   }
 }

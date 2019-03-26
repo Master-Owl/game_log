@@ -66,9 +66,9 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
                       iconSize: headline.fontSize - 10.0,
                       onPressed: () => { Navigator.pop(context, gameplay) },
                     ),
-                    flex: 1
+                    flex: 2
                   ),
-                  Spacer(flex: 2),
+                  Spacer(flex: 1),
                   Center(
                     child: Text(gameplay.game.name, style: headline),
                   ),

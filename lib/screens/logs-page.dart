@@ -108,6 +108,7 @@ class _LogsPageState extends State<LogsPage>
   }
 
   void sortGameplays() {
+    gameplays =globalGameplayList;
     switch (sortBy) {
       case SortBy.alphabetical:
         gameplays.sort((a, b) => a.game.name.compareTo(b.game.name));
@@ -142,13 +143,25 @@ class _LogsPageState extends State<LogsPage>
                 gameplays.removeAt(idx);
                 gameplays.insert(idx, changedPlay);
               });
+            }
+          },
+        () async {
+          bool deleteLog = await showConfirmDialog(
+            context, 'Delete this log?', 'Yes', 'No');
+
+          if (deleteLog != null && deleteLog) {
+            await play.dbRef.delete();
+            setState(() {
+              gameplays.remove(play); 
+            });
+          }
         }
-      }));
+      ));
     }
     return list;
   }
 
-  Container makeListTile(title, subtitle, onTap) {
+  Container makeListTile(title, subtitle, onTap, onLongPress) {
     return Container(
         decoration: BoxDecoration(
             border:
@@ -158,6 +171,7 @@ class _LogsPageState extends State<LogsPage>
           title: title,
           subtitle: subtitle,
           onTap: onTap,
+          onLongPress: onLongPress,
         ));
   }
 
@@ -223,7 +237,8 @@ class _LogsPageState extends State<LogsPage>
           playDate: doc.data['playdate'],
           teams: teams,
           scores: scores,
-          winners: winners));
+          winners: winners,
+          dbRef: doc.reference));
     }
 
     setState(() {

@@ -50,23 +50,6 @@ class _PlayerListState extends State<PlayerList> {
     for (int i = 0; i < teams.length; ++i) {
       teamColors.add(getRandomColor());
     }
-
-    if (allSavedPlayers.length == 0)
-      Firestore.instance.collection('players')
-        .getDocuments()
-        .then((snapshot) {
-          List<Player> dbPlayers = [];
-          snapshot.documents.forEach((doc) {
-            dbPlayers.add(Player(
-              name: doc.data['name'],
-              color: Color(doc.data['color']),
-              dbRef: doc.reference
-            ));
-          });
-          setState(() {
-            allSavedPlayers = dbPlayers; 
-          });
-        });
       
     super.initState();
   }

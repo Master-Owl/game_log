@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -49,4 +50,37 @@ String formatTimeDuration(Duration time) {
 
 DateTime readTimestamp(Timestamp stamp) {
   return DateTime.fromMillisecondsSinceEpoch(stamp.millisecondsSinceEpoch);
+}
+
+Future<dynamic> showConfirmDialog(BuildContext context, String title, String affirmativeText, String negativeText) {
+  return showDialog<dynamic>(
+    context: context,
+    builder: (BuildContext context) {
+      ThemeData theme = Theme.of(context);
+      TextStyle nopeStyle = TextStyle(color: theme.accentColor, fontSize: 22.0, fontWeight: FontWeight.w400);
+      TextStyle yesStyle = TextStyle(color: theme.errorColor, fontSize: 22.0, fontWeight: FontWeight.w400);
+      
+      return SimpleDialog(
+        contentPadding: EdgeInsets.all(16.0),
+        title: Text(title, style: theme.textTheme.title),
+        children: [
+          Row(
+            children: [
+              Spacer(),
+              FlatButton(
+                child: Text(negativeText, style: nopeStyle),
+                textColor: theme.primaryColor,
+                onPressed: () => { Navigator.pop(context, false) },
+              ),
+              FlatButton(
+                child: Text(affirmativeText, style: yesStyle),
+                textColor: theme.errorColor,
+                onPressed: () => { Navigator.pop(context, true) },
+              )
+            ]
+          )
+        ]
+      );
+    }
+  );
 }
