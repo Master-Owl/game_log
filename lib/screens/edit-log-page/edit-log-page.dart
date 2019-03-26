@@ -64,10 +64,11 @@ class _EditLogState extends State<EditLogPage> {
                 child: Column(
                   children: [
                     GamePickerWidget(
-                        onItemSelected: (selectedGame) => setState(() {
-                              game = selectedGame;
-                              gameplay.game = selectedGame;
-                            })),
+                      selectedGame: game,
+                      onItemSelected: (selectedGame) => setState(() {
+                            game = selectedGame;
+                            gameplay.game = selectedGame;
+                          })),
                     Padding(
                       padding: EdgeInsets.only(top: 24.0),
                       child: PlayerList(

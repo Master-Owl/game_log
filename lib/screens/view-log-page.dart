@@ -56,15 +56,18 @@ class _ViewLogState extends State<ViewLogPage> with SingleTickerProviderStateMix
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
-                children: [                  
-                  Expanded(
-                    child: IconButton(
-                      icon: Icon(
-                        Icons.arrow_back,
-                        color: headline.color,
-                      ), 
-                      iconSize: headline.fontSize - 10.0,
-                      onPressed: () => { Navigator.pop(context, gameplay) },
+                children: [
+                  Expanded(                  
+                    child: Align(
+                      alignment: Alignment.centerLeft,                    
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          color: headline.color,
+                        ), 
+                        iconSize: headline.fontSize - 10.0,
+                        onPressed: () => { Navigator.pop(context, gameplay) },
+                      ),
                     ),
                     flex: 2
                   ),
