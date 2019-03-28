@@ -21,8 +21,12 @@ const Color defaultBlack = Colors.black87;
 const Color defaultWhite = Colors.white;
 const double lrPadding = 16.0;
 const double headerPaddingTop = 48.0;
-const Duration animDuration =Duration(milliseconds: 400);
+const Duration animDuration = Duration(milliseconds: 400);
 
+const IconData gameIcon = IconData(0xe981, fontFamily: 'icomoon');
+const IconData starsIcon = IconData(0xe980, fontFamily: 'icomoon');
+const IconData spinnerIcon_1 = IconData(0xe982, fontFamily: 'icomoon');
+const IconData spinnerIcon_2 = IconData(0xe983, fontFamily: 'icomoon');
 
 Animation<Offset> slideAnimation(AnimationController animController, SlideDirection dir) {
   return Tween<Offset>(

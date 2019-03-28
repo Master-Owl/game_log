@@ -1,6 +1,8 @@
-import './game.dart';
-import './player.dart';
+import 'dart:async';
+import 'package:game_log/data/game.dart';
+import 'package:game_log/data/player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/data/globals.dart';
 
 /// GamePlays always have an associated game
 /// and a list of players. It should also
@@ -15,32 +17,29 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 ///  [] teams
 /// 
 /// Cooperative:
-///  [] scores
+///  [/] scores
 ///  [x] winners
 ///  [] teams
 /// 
 /// Team:
-///  [] scores
+///  [/] scores
 ///  [x] winners
 ///  [x] teams
 
 class GamePlay {
-  GamePlay(this.game, this.playerRefs, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef, this.players }) {
+  GamePlay(this.game, this.playerRefs, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef }) {
     if (game == null) game = new Game(name: '');
     if (playerRefs == null) {
       playerRefs = [];
     }
-    if (players == null) {
-      players = [];
-    }
     if (teams == null) {
       teams = {};
     }
-    if (winners == null) {
-      winners = [];
-    }
     if (scores == null) {
       scores = {};
+    }
+    if (winners == null) {
+      _determineWinners();
     }
     if (playDate == null) {
       playDate = DateTime.now();
@@ -50,11 +49,46 @@ class GamePlay {
     }
   }
 
+  void _determineWinners() {
+    dynamic winningScore;
+    winners = [];
+    switch (game.condition) {
+      case WinConditions.score_highest:
+        winningScore = -double.infinity;
+        for (String player in scores.keys) {
+          int score = scores[player];
+          if (score > winningScore) {
+            winningScore = score;
+            winners.clear();
+            winners.add(player);
+          }
+          else if (score == winningScore) {
+            winners.add(player);
+          }
+        }
+        break;
+      case WinConditions.score_lowest:
+        winningScore = double.infinity;
+        for (String player in scores.keys) {
+          int score = scores[player];
+          if (score < winningScore) {
+            winningScore = score;
+            winners.clear();
+            winners.add(player);
+          }
+          else if (score == winningScore) {
+            winners.add(player);
+          }
+        }
+        break;
+      default: break;
+    }
+  }
+
   Game game;
   DateTime playDate;
   Duration playTime;
 
-  List<Player> players;
   List<DocumentReference> playerRefs;
   List<String> winners;
   Map<String, int> scores;
@@ -62,22 +96,18 @@ class GamePlay {
 
   DocumentReference dbRef;
 
+  Future<List<Player>> getPlayers() => getPlayersFromRefs(playerRefs);
   int get playerCount => playerRefs.length;
 
   Map<String, dynamic> serialize() {
     Map<String, dynamic> data = {};
     data['game'] = game.dbRef;
+    data['players'] = playerRefs;
     data['playdate'] = playDate;
     data['playtime'] = playTime.inMinutes;
+
+    _determineWinners();
     data['winners'] = winners;
-
-    if (playerRefs == null || (playerRefs.length == 0 && players.length > 0)) {
-      for (Player p in players) {
-        playerRefs.add(p.dbRef);
-      }
-    }
-
-    data['players'] = playerRefs;
     
     if (scores.length > 0) {
       Map<dynamic, dynamic> pScores = {};

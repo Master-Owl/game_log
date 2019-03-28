@@ -2,7 +2,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 
-
 class HomePage extends StatefulWidget {
   HomePage({Key key}) : super(key: key);
 
@@ -18,8 +17,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
-  final String pageTitle = 'GameLog';
-
   AnimationController animController;
   bool _firstLoad;
   IconData gameIcon;
@@ -29,12 +26,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     animController = AnimationController(vsync: this, duration: animDuration);
     _firstLoad = true;
-    gameIcon = const IconData(0xe9e9, fontFamily: 'icomoon');
   }
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
     animController.fling();
 
     return FadeTransition(
@@ -46,10 +41,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(
                   children: [
                     Center(
-                        child:
-                            Text(pageTitle, style: theme.textTheme.headline)),
+                        child: Text('Game Log',
+                            style: TextStyle(
+                                fontSize: 42.0,
+                                color: Colors.black54,
+                                fontWeight: FontWeight.w300))),
                     Container(
-                      padding: EdgeInsets.only(top: 50.0),
+                      padding: EdgeInsets.only(top: 30.0),
                       constraints: BoxConstraints.tightFor(height: 500.0),
                       child: GridView.count(
                           crossAxisCount: 2,
@@ -63,7 +61,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _createLog() {
-    Navigator.pushNamed(context, '/edit-log-page', arguments: {'gameplay': null});
+    Navigator.pushNamed(context, '/edit-log-page',
+        arguments: {'gameplay': null});
   }
 
   void _addGame() {
@@ -71,7 +70,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _addPlayer() {
-    Navigator.pushNamed(context, '/edit-player-page', arguments: {'player': null});
+    Navigator.pushNamed(context, '/edit-player-page',
+        arguments: {'player': null});
   }
 
   void _goToSettings() {
@@ -84,26 +84,74 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     cards.add(Card(
         color: theme.primaryColor,
         child: InkWell(
-          child: Icon(Icons.playlist_add, color: Colors.white, size: 80.0),
-          onTap: _createLog)));
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                  Icon(Icons.playlist_add, color: Colors.white, size: 80.0),
+                  Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text("Create Log",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w300)))
+                ])),
+            onTap: _createLog)));
 
     cards.add(Card(
         color: theme.accentColor,
         child: InkWell(
-            child: Icon(gameIcon, color: Colors.white, size: 80.0),
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                  Icon(gameIcon, color: Colors.white, size: 80.0),
+                  Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text("Add Game",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w300)))
+                ])),
             onTap: _addGame)));
 
     cards.add(Card(
-      color: theme.accentColor,
-      child:InkWell(
-        child: Icon(Icons.person_add, color: Colors.white, size: 80.0),
-        onTap: _addPlayer)));
+        color: theme.accentColor,
+        child: InkWell(
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                  Icon(Icons.person_add, color: Colors.white, size: 80.0),
+                  Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text("Add Player",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w300)))
+                ])),
+            onTap: _addPlayer)));
 
     cards.add(Card(
         color: theme.primaryColor,
         child: InkWell(
-          child: Icon(Icons.settings, color: Colors.white, size: 80.0),
-          onTap: _goToSettings)));
+            child: Center(
+                child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                  Icon(Icons.settings, color: Colors.white, size: 80.0),
+                  Padding(
+                      padding: EdgeInsets.only(top: 8.0),
+                      child: Text("Settings",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24.0,
+                              fontWeight: FontWeight.w300)))
+                ])),
+            onTap: _goToSettings)));
 
     if (_firstLoad) {
       _firstLoad = false;
@@ -134,7 +182,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return cards;
   }
 
-  void delayAnimations(List<AnimationController> controllers, Duration offset) async {
+  void delayAnimations(
+      List<AnimationController> controllers, Duration offset) async {
     for (AnimationController ctrl in controllers) {
       ctrl.forward();
       await Future.delayed(offset);

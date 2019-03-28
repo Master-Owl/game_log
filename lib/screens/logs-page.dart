@@ -194,17 +194,19 @@ class _LogsPageState extends State<LogsPage>
       });
 
       // Optional data
-      List<String> winners = [];
-      Map<String, List<DocumentReference>> teams = {};
-      Map<String, int> scores = {};
+      List<String> winners;
+      Map<String, List<DocumentReference>> teams;
+      Map<String, int> scores;
 
       if (doc.data['winners'] != null) {
+        winners = [];
         for (String winner in doc.data['winners']) {
           winners.add(winner);
         }
       }
 
       if (doc.data['teams'] != null) {
+        teams = {};
         for (String teamName in doc.data['teams'].keys) {
           List pRefs = doc.data['teams'][teamName];
           List<DocumentReference> team = [];
@@ -221,6 +223,7 @@ class _LogsPageState extends State<LogsPage>
       }
 
       if (doc.data['scores'] != null) {
+        scores = {};
         for (String pRefId in doc.data['scores'].keys) {
           for (DocumentReference p in playerRefs) {
             if (p.documentID == pRefId) {

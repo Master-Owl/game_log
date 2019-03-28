@@ -54,9 +54,9 @@ class _EditLogState extends State<EditLogPage> {
         onPressed: saveLog));
 
     return Scaffold(
-        appBar: AppBar(
+        appBar: AppBar(            
             title: Text(isNewLog ? 'New Log' : 'Edit Log',
-                style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w400)),
+                style: Theme.of(context).textTheme.title),
             actions: actions),
         body: SingleChildScrollView(
             child: Padding(

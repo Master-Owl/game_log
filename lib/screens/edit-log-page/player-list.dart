@@ -19,7 +19,7 @@ class _PlayerListState extends State<PlayerList> {
   _PlayerListState(this.gameplay, this.onPlayerListChange);
 
   GamePlay gameplay;
-  List<Player> players;
+  List<Player> usedPlayers;
   List<Player> allSavedPlayers;
   List<List<Player>> teams;
   List<Color> teamColors;
@@ -30,14 +30,23 @@ class _PlayerListState extends State<PlayerList> {
   @override
   void initState() {
     if (gameplay == null) gameplay = GamePlay(Game(), null);
-    players = gameplay.players;
     allSavedPlayers = globalPlayerList;
+
     teams = [];
     teamColors = [];
+    usedPlayers = [];
+    print(gameplay.scores);
+
+    gameplay.getPlayers().then((playerList) => setState(() => initPlayerList(playerList)));
+    super.initState();
+  }
+
+  void initPlayerList(playerList) {
+    usedPlayers = playerList;
     for (List<DocumentReference> teamList in gameplay.teams.values) {
       List<Player> team = [];
       for (DocumentReference pRef in teamList) {
-        for (Player player in players) {
+        for (Player player in usedPlayers) {
           if (player.dbRef == pRef) {
             team.add(player);
             break;
@@ -50,8 +59,6 @@ class _PlayerListState extends State<PlayerList> {
     for (int i = 0; i < teams.length; ++i) {
       teamColors.add(getRandomColor());
     }
-      
-    super.initState();
   }
 
   @override
@@ -72,7 +79,7 @@ class _PlayerListState extends State<PlayerList> {
           break;
         case GameType.team:
           if (prevGameType !=GameType.team) {
-            players.clear();
+            usedPlayers.clear();
           }
           break;
       }
@@ -116,7 +123,7 @@ class _PlayerListState extends State<PlayerList> {
               itemExtent: listTileHeight,
               children: gameType == GameType.team ? 
                 buildTeamTiles() : 
-                buildListTiles(players)
+                buildListTiles(usedPlayers)
             )
           )
         ]
@@ -128,8 +135,8 @@ class _PlayerListState extends State<PlayerList> {
     return allSavedPlayers.length > 0 ? () async {
       Player player = await addPerson();
       if (player != null) setState(() {
-        players.add(player);
-        gameplay.players = players;
+        usedPlayers.add(player);
+        gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
         onPlayerListChange(gameplay);
       });
     } : null;
@@ -153,8 +160,8 @@ class _PlayerListState extends State<PlayerList> {
                 Player player = await addPerson();
                 if (player != null) setState(() {
                   teams[i].add(player);
-                  players.add(player);
-                  gameplay.players = players;
+                  usedPlayers.add(player);
+                  gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
                   gameplay.teams = getTeams(teams);
                   onPlayerListChange(gameplay);
                 });
@@ -165,9 +172,9 @@ class _PlayerListState extends State<PlayerList> {
               color: Colors.red,
               tooltip: 'Delete Team',
               onPressed: () => setState(() {
-                for (Player p in team) { players.remove(p); }
+                for (Player p in team) { usedPlayers.remove(p); }
                 teams.removeAt(i);
-                gameplay.players = players;
+                gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
                 gameplay.teams = getTeams(teams);
                 onPlayerListChange(gameplay);
               }),
@@ -196,8 +203,8 @@ class _PlayerListState extends State<PlayerList> {
                   color: Colors.red,
                   onPressed: () => setState(() {
                     teams[i].removeAt(j);
-                    players.remove(player);
-                    gameplay.players = players;
+                    usedPlayers.remove(player);
+                    gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
                     gameplay.teams =getTeams(teams);
                     onPlayerListChange(gameplay);
                   }),
@@ -215,12 +222,12 @@ class _PlayerListState extends State<PlayerList> {
   Map<String, List<DocumentReference>> getTeams(List<List<Player>> teams) {
     Map<String, List<DocumentReference>> gameplayTeams = {};
     for (int i = 0; i < teams.length; ++i) {
-      String teamName = 'Team $i';
-      List<DocumentReference> players = [];
+      String teamName = 'Team ${i+1}';
+      List<DocumentReference> localPlayers = [];
       for (Player p in teams[i]) {
-        players.add(p.dbRef);
+        localPlayers.add(p.dbRef);
       }
-      gameplayTeams.putIfAbsent(teamName, () => players);
+      gameplayTeams.putIfAbsent(teamName, () => localPlayers);
     }
     return gameplayTeams;
   }
@@ -229,7 +236,6 @@ class _PlayerListState extends State<PlayerList> {
     List<Widget> tiles = [];
     Widget appendedWidget = Container();
     Color color = getRandomColor();
-
 
     for (Player player in playerList) {
       switch(gameType) {
@@ -278,8 +284,8 @@ class _PlayerListState extends State<PlayerList> {
                 icon: Icon(Icons.close),
                 color: Colors.red,
                 onPressed: () => setState(() {
-                  players.remove(player);
-                  gameplay.players = players;
+                  usedPlayers.remove(player);
+                  gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
                   onPlayerListChange(gameplay);
                 }),
               ),
@@ -318,7 +324,7 @@ class _PlayerListState extends State<PlayerList> {
     List<Widget> options = [];
 
     for (Player player in allSavedPlayers) {
-      if (players.contains(player)) continue;
+      if (usedPlayers.contains(player)) continue;
       options.add(
         SimpleDialogOption(
           child: Row(
