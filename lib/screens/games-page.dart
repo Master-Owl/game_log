@@ -177,6 +177,12 @@ class _GamesPageState extends State<GamesPage>
       games = globalGameList;
     });
   }
+
+  @override
+  void dispose() {
+    animController.dispose();
+    super.dispose();
+  }
 }
 
 enum SortGamesBy {

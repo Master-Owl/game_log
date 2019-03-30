@@ -16,7 +16,7 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
   Widget _currentPage;
   List<Widget> _mainPages;
   List<BottomNavigationBarItem> _items = [
-    BottomNavigationBarItem(icon: Icon(Icons.spa), title: Text('Games'),),
+    BottomNavigationBarItem(icon: Icon(gameIcon), title: Text('Games'),),
     BottomNavigationBarItem(icon: Icon(Icons.home), title: Text('Home')),
     BottomNavigationBarItem(icon: Icon(Icons.view_list), title: Text('Logs'))
   ];

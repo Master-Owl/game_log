@@ -157,28 +157,40 @@ class _ViewLogState extends State<ViewLogPage>
       switch (gameplay.game.type) {
         case GameType.standard:
           tileColor = player.color;
-          Widget pointText = RichText(
-            text: TextSpan(
-                text: gameplay.scores[player.dbRef.documentID].toString(),
-                style: TextStyle(fontWeight: FontWeight.bold, color:defaultGray, fontSize: 16.0),
-                children: [
-                  TextSpan(
-                      text: ' Pts',
-                      style: TextStyle(
-                          fontWeight: FontWeight.w400, color: defaultGray))
-                ]),
-          );
+          switch(gameplay.game.condition) {
+            case WinConditions.score_highest:
+            case WinConditions.score_lowest:
+              Widget pointText = RichText(
+                text: TextSpan(
+                    text: gameplay.scores[player.dbRef.documentID].toString(),
+                    style: TextStyle(fontWeight: FontWeight.bold, color:defaultGray, fontSize: 16.0),
+                    children: [
+                      TextSpan(
+                          text: ' Pts',
+                          style: TextStyle(
+                              fontWeight: FontWeight.w400, color: defaultGray))
+                    ]),
+              );
 
-          if (gameplay.winners.contains(player.dbRef.documentID)) {
-            appendedWidget = Expanded(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [winnerIcon,pointText]
-              ),
-            );
-          } else {
-            appendedWidget = pointText;
-          }
+              if (gameplay.winners.contains(player.dbRef.documentID)) {
+                appendedWidget = Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [winnerIcon,pointText]
+                  ),
+                );
+              } else {
+                appendedWidget = pointText;
+              }
+              break;
+            case WinConditions.single_loser:
+            case WinConditions.single_winner:
+              if (gameplay.winners.contains(player.dbRef.documentID)) {
+                appendedWidget = winnerIcon;
+              }
+              break;
+            default: break;
+          }      
           break;
 
         case GameType.cooperative:

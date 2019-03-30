@@ -23,10 +23,12 @@ const double lrPadding = 16.0;
 const double headerPaddingTop = 48.0;
 const Duration animDuration = Duration(milliseconds: 400);
 
-const IconData gameIcon = IconData(0xe981, fontFamily: 'icomoon');
-const IconData starsIcon = IconData(0xe980, fontFamily: 'icomoon');
-const IconData spinnerIcon_1 = IconData(0xe982, fontFamily: 'icomoon');
-const IconData spinnerIcon_2 = IconData(0xe983, fontFamily: 'icomoon');
+const IconData starsIcon = IconData(0xe9e8, fontFamily: 'icomoon');
+const IconData spinnerIcon = IconData(0xe9e7, fontFamily: 'icomoon');
+const IconData messageBubbleIcon = IconData(0xe9e6, fontFamily: 'icomoon');
+const IconData addSquare = IconData(0xe9e4, fontFamily: 'icomoon');
+const IconData addGameIcon = IconData(0x0042, fontFamily: 'gamelog');
+const IconData gameIcon = IconData(0x0043, fontFamily: 'gamelog');
 
 Animation<Offset> slideAnimation(AnimationController animController, SlideDirection dir) {
   return Tween<Offset>(

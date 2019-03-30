@@ -106,7 +106,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                  Icon(gameIcon, color: Colors.white, size: 80.0),
+                  Icon(addGameIcon, color: Colors.white, size: 80.0),
                   Padding(
                       padding: EdgeInsets.only(top: 8.0),
                       child: Text("Add Game",

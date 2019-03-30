@@ -238,8 +238,9 @@ class _PlayerListState extends State<PlayerList> {
     Color color = getRandomColor();
 
     for (Player player in playerList) {
-      switch(gameType) {
-        case GameType.standard:
+      switch(gameplay.game.condition) {
+        case WinConditions.score_highest:
+        case WinConditions.score_lowest:
           String score = '0';
           for (String pRef in gameplay.scores.keys) {
             if (pRef == player.dbRef.documentID) {
@@ -264,6 +265,35 @@ class _PlayerListState extends State<PlayerList> {
             )
           );
           color = player.color;
+          break;
+        case WinConditions.last_standing:
+        case WinConditions.single_winner:
+          bool isWinner = gameplay.winners.contains(player.dbRef.documentID);
+          appendedWidget = Container(
+            width: 35.0,
+            child: Row(
+              children: [
+                Padding(
+                  padding:EdgeInsets.only(right: 8.0),
+                  child: Text(isWinner ? 'Winner' : '', style: Theme.of(context).textTheme.body1),
+                ),
+                Checkbox(
+                  onChanged: isWinner || gameplay.winners.length == 0 ? (winner) {
+                    if (winner == false) {
+                      setState(() {
+                        gameplay.winners.clear();
+                      });
+                    } else {
+                      setState(() {
+                        gameplay.winners.add(player.dbRef.documentID);
+                      });
+                    }
+                  } : null,
+                  value: isWinner,                  
+                ),
+              ]
+            )
+          );
           break;
         default: break;
       }
