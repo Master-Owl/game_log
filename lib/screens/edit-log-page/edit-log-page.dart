@@ -21,10 +21,16 @@ class _EditLogState extends State<EditLogPage> {
   _EditLogState(this.gameplay);
 
   GamePlay gameplay;
+  GamePlay modifiedGameplay;
   DateTime playDate;
   Duration playTime;
   bool isNewLog = false;
   Game game;
+  Widget appendedWidget;
+  TextStyle textStyle = TextStyle(
+    color: defaultGray,
+    fontSize: 26.0,
+    fontWeight: FontWeight.w300);
 
   @override
   void initState() {
@@ -32,6 +38,12 @@ class _EditLogState extends State<EditLogPage> {
 
     isNewLog = gameplay == null;
     if (isNewLog) gameplay = new GamePlay(Game(), []);
+    modifiedGameplay = new GamePlay(Game(), []);
+
+    modifiedGameplay.playerRefs = List.from(gameplay.playerRefs);
+    modifiedGameplay.scores = Map.from(gameplay.scores);
+    modifiedGameplay.teams = Map.from(gameplay.teams);
+    modifiedGameplay.wonGame = gameplay.wonGame;
 
     playDate = gameplay.playDate;
     playTime = gameplay.playTime;
@@ -40,6 +52,40 @@ class _EditLogState extends State<EditLogPage> {
 
   @override
   Widget build(BuildContext context) {
+    switch (modifiedGameplay.game.condition) {
+      case WinConditions.all_or_nothing:
+        appendedWidget = Padding(
+          padding: EdgeInsets.only(top: 24.0),
+          child: Row(
+            children: [
+              Text('Won', style: textStyle),
+              Spacer(),
+              Checkbox(
+                value: modifiedGameplay.winners.length > 0,
+                onChanged: (won) {
+                  if (won) {
+                    setState(() {                      
+                      modifiedGameplay.winners.clear();
+                      for (DocumentReference pRef in modifiedGameplay.playerRefs) {
+                        modifiedGameplay.winners.add(pRef.documentID);
+                      }
+                    });
+                  } else {
+                    setState(() {
+                      modifiedGameplay.winners.clear(); 
+                    });
+                  }
+                },
+              )
+            ],
+          ),
+        );
+        break;
+      default:
+        appendedWidget = Container();
+        break;
+    }
+
     List<Widget> actions = [];
     if (!isNewLog) {
       actions.add(IconButton(
@@ -67,33 +113,28 @@ class _EditLogState extends State<EditLogPage> {
                       selectedGame: game,
                       onItemSelected: (selectedGame) => setState(() {
                             game = selectedGame;
-                            gameplay.game = selectedGame;
+                            modifiedGameplay.game = selectedGame;
                           })),
                     Padding(
                       padding: EdgeInsets.only(top: 24.0),
                       child: PlayerList(
-                          gameplay: gameplay,
-                          onPlayerListChange: (changedGameplay) => setState(() {
-                                gameplay = changedGameplay;
-                              })),
+                          gameplay: modifiedGameplay,
+                          onPlayerListChange: (changedGameplay) => {
+                            modifiedGameplay = changedGameplay
+                          })
                     ),
+                    appendedWidget,
                     Padding(
                         padding: EdgeInsets.only(top: 24.0),
                         child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                'Date Played',
-                                style: TextStyle(
-                                    color: defaultGray,
-                                    fontSize: 26.0,
-                                    fontWeight: FontWeight.w300),
-                              ),
+                              Text('Date Played', style: textStyle),
                               Spacer(),
                               Container(
                                   margin: EdgeInsets.only(left: 24.0),
                                   constraints: BoxConstraints(
-                                      maxHeight: 50.0, maxWidth: 175.0),
+                                      maxHeight: 50.0, maxWidth: 180.0),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         color: Theme.of(context).primaryColor),
@@ -120,18 +161,12 @@ class _EditLogState extends State<EditLogPage> {
                         child: Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
-                                'Play Time',
-                                style: TextStyle(
-                                    color: defaultGray,
-                                    fontSize: 26.0,
-                                    fontWeight: FontWeight.w300),
-                              ),
+                              Text('Play Time', style: textStyle),
                               Spacer(),
                               Container(
                                   margin: EdgeInsets.only(left: 24.0),
                                   constraints: BoxConstraints(
-                                      maxHeight: 50.0, maxWidth: 175.0),
+                                      maxHeight: 50.0, maxWidth: 180.0),
                                   decoration: BoxDecoration(
                                     border: Border.all(
                                         color: Theme.of(context).primaryColor),
@@ -180,14 +215,11 @@ class _EditLogState extends State<EditLogPage> {
     Duration newDuration = await showDurationPicker(
         context: context, initialTime: playTime, snapToMins: 1.0);
 
-    if (newDuration != null) {
-      setState(() {
-        playTime = newDuration;
-      });
-    }
+    if (newDuration != null) setState(() => {playTime = newDuration});    
   }
 
   void saveLog() {
+    gameplay = modifiedGameplay;
     gameplay.game = game;
     gameplay.playTime = playTime;
     gameplay.playDate = playDate;

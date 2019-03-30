@@ -27,7 +27,7 @@ import 'package:game_log/data/globals.dart';
 ///  [x] teams
 
 class GamePlay {
-  GamePlay(this.game, this.playerRefs, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef }) {
+  GamePlay(this.game, this.playerRefs, { this.playDate, this.playTime, this.scores, this.teams, this.winners, this.dbRef, this.wonGame }) {
     if (game == null) game = new Game(name: '');
     if (playerRefs == null) {
       playerRefs = [];
@@ -46,6 +46,9 @@ class GamePlay {
     }
     if (playTime == null) {
       playTime = Duration(minutes: 0);
+    }
+    if (wonGame == null) {
+      wonGame = false;
     }
   }
 
@@ -81,6 +84,14 @@ class GamePlay {
           }
         }
         break;
+      case WinConditions.all_or_nothing:
+        winners.clear();
+        if (wonGame) {
+          for (DocumentReference pRef in playerRefs) {
+            winners.add(pRef.documentID);
+          }
+        }
+        break;
       default: break;
     }
   }
@@ -88,6 +99,7 @@ class GamePlay {
   Game game;
   DateTime playDate;
   Duration playTime;
+  bool wonGame;
 
   List<DocumentReference> playerRefs;
   List<String> winners;
@@ -105,6 +117,7 @@ class GamePlay {
     data['players'] = playerRefs;
     data['playdate'] = playDate;
     data['playtime'] = playTime.inMinutes;
+    
 
     _determineWinners();
     data['winners'] = winners;
@@ -127,6 +140,10 @@ class GamePlay {
         teamRefs[teamName] = pRefs;
       }
       data['teams'] = teamRefs;
+    }
+
+    if (game.condition == WinConditions.all_or_nothing) {
+      data['won'] = wonGame;
     }
 
     return data;

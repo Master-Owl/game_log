@@ -114,7 +114,7 @@ class _LogsPageState extends State<LogsPage>
         gameplays.sort((a, b) => a.game.name.compareTo(b.game.name));
         break;
       case SortBy.most_recent:
-        gameplays.sort((a, b) => a.playDate.compareTo(b.playDate));
+        gameplays.sort((a, b) => b.playDate.compareTo(a.playDate));
         break;
       case SortBy.play_time_shortest:
         gameplays.sort((a, b) => a.playTime.compareTo(b.playTime));

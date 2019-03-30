@@ -19,7 +19,7 @@ class _PlayerListState extends State<PlayerList> {
   _PlayerListState(this.gameplay, this.onPlayerListChange);
 
   GamePlay gameplay;
-  List<Player> usedPlayers;
+  List<Player> addedPlayers;
   List<Player> allSavedPlayers;
   List<List<Player>> teams;
   List<Color> teamColors;
@@ -34,7 +34,7 @@ class _PlayerListState extends State<PlayerList> {
 
     teams = [];
     teamColors = [];
-    usedPlayers = [];
+    addedPlayers = [];
     print(gameplay.scores);
 
     gameplay.getPlayers().then((playerList) => setState(() => initPlayerList(playerList)));
@@ -42,11 +42,11 @@ class _PlayerListState extends State<PlayerList> {
   }
 
   void initPlayerList(playerList) {
-    usedPlayers = playerList;
+    addedPlayers = playerList;
     for (List<DocumentReference> teamList in gameplay.teams.values) {
       List<Player> team = [];
       for (DocumentReference pRef in teamList) {
-        for (Player player in usedPlayers) {
+        for (Player player in addedPlayers) {
           if (player.dbRef == pRef) {
             team.add(player);
             break;
@@ -63,6 +63,10 @@ class _PlayerListState extends State<PlayerList> {
 
   @override
   Widget build(BuildContext context) {
+    TextStyle textStyle = TextStyle(
+                  color: defaultGray,
+                  fontSize: 24.0
+                );
     double listTileHeight = 50.0;
     double minHeight = 200.0;
     Color accent = Theme.of(context).accentColor;
@@ -79,12 +83,26 @@ class _PlayerListState extends State<PlayerList> {
           break;
         case GameType.team:
           if (prevGameType !=GameType.team) {
-            usedPlayers.clear();
+            addedPlayers.clear();
           }
           break;
       }
     }
+
     prevGameType = gameType;
+    Widget extraTextLabel = Container();
+    switch (gameplay.game.condition) {
+      case WinConditions.single_loser:
+        extraTextLabel = Text('Loser', style: textStyle);
+        break;
+      case WinConditions.single_winner:
+        extraTextLabel = Text('Winner', style: textStyle);
+        break;
+      case WinConditions.single_team:
+        extraTextLabel = Text('Winning Team', style: textStyle);
+        break;
+      default: break;
+    }
 
     // Layout the list
     return Column(
@@ -94,12 +112,10 @@ class _PlayerListState extends State<PlayerList> {
             children: [
               Text(
                 gameType == GameType.team ? 'Teams' : 'Players',
-                style: TextStyle(
-                  color: defaultGray,
-                  fontSize: 24.0
-                ),
+                style: textStyle,
               ),
               Spacer(),
+              extraTextLabel,
               IconButton(
                 icon: Icon(gameType == GameType.team ? 
                   Icons.group_add : 
@@ -123,7 +139,7 @@ class _PlayerListState extends State<PlayerList> {
               itemExtent: listTileHeight,
               children: gameType == GameType.team ? 
                 buildTeamTiles() : 
-                buildListTiles(usedPlayers)
+                buildListTiles(addedPlayers)
             )
           )
         ]
@@ -135,8 +151,8 @@ class _PlayerListState extends State<PlayerList> {
     return allSavedPlayers.length > 0 ? () async {
       Player player = await addPerson();
       if (player != null) setState(() {
-        usedPlayers.add(player);
-        gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
+        addedPlayers.add(player);
+        updateGameplayPlayerList(addedPlayers);
         onPlayerListChange(gameplay);
       });
     } : null;
@@ -147,11 +163,23 @@ class _PlayerListState extends State<PlayerList> {
 
     for (int i = 0; i < teams.length; ++i) {
       List<Player> team = teams[i];
+      String teamName = 'Team ${i + 1}';
       tiles.add(
         Row(
           children: [
-            Text('Team ${i + 1}', style: Theme.of(context).textTheme.title),
+            Text(teamName, style: Theme.of(context).textTheme.title),
             Spacer(),
+            Checkbox(
+              value: gameplay.winners.contains(teamName),
+              onChanged: (won) {
+                setState(() {
+                  gameplay.winners.clear();
+                  if (won) {
+                    gameplay.winners.add(teamName);
+                  }
+                });
+              },
+            ),
             IconButton(
               icon: Icon(Icons.person_add),
               color: Theme.of(context).accentColor,
@@ -160,8 +188,8 @@ class _PlayerListState extends State<PlayerList> {
                 Player player = await addPerson();
                 if (player != null) setState(() {
                   teams[i].add(player);
-                  usedPlayers.add(player);
-                  gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
+                  addedPlayers.add(player);
+                  updateGameplayPlayerList(addedPlayers);
                   gameplay.teams = getTeams(teams);
                   onPlayerListChange(gameplay);
                 });
@@ -172,9 +200,9 @@ class _PlayerListState extends State<PlayerList> {
               color: Colors.red,
               tooltip: 'Delete Team',
               onPressed: () => setState(() {
-                for (Player p in team) { usedPlayers.remove(p); }
+                for (Player p in team) { addedPlayers.remove(p); }
                 teams.removeAt(i);
-                gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
+                updateGameplayPlayerList(addedPlayers);
                 gameplay.teams = getTeams(teams);
                 onPlayerListChange(gameplay);
               }),
@@ -203,9 +231,9 @@ class _PlayerListState extends State<PlayerList> {
                   color: Colors.red,
                   onPressed: () => setState(() {
                     teams[i].removeAt(j);
-                    usedPlayers.remove(player);
-                    gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
-                    gameplay.teams =getTeams(teams);
+                    addedPlayers.remove(player);
+                    updateGameplayPlayerList(addedPlayers);
+                    gameplay.teams = getTeams(teams);
                     onPlayerListChange(gameplay);
                   }),
                 ),
@@ -269,30 +297,16 @@ class _PlayerListState extends State<PlayerList> {
         case WinConditions.last_standing:
         case WinConditions.single_winner:
           bool isWinner = gameplay.winners.contains(player.dbRef.documentID);
-          appendedWidget = Container(
-            width: 35.0,
-            child: Row(
-              children: [
-                Padding(
-                  padding:EdgeInsets.only(right: 8.0),
-                  child: Text(isWinner ? 'Winner' : '', style: Theme.of(context).textTheme.body1),
-                ),
-                Checkbox(
-                  onChanged: isWinner || gameplay.winners.length == 0 ? (winner) {
-                    if (winner == false) {
-                      setState(() {
-                        gameplay.winners.clear();
-                      });
-                    } else {
-                      setState(() {
-                        gameplay.winners.add(player.dbRef.documentID);
-                      });
-                    }
-                  } : null,
-                  value: isWinner,                  
-                ),
-              ]
-            )
+          appendedWidget = Checkbox(            
+            onChanged: (won) {
+              setState(() {
+                gameplay.winners.clear();
+                if (won) {
+                  gameplay.winners.add(player.dbRef.documentID);
+                }
+              });
+            },
+            value: isWinner,                  
           );
           break;
         default: break;
@@ -314,8 +328,8 @@ class _PlayerListState extends State<PlayerList> {
                 icon: Icon(Icons.close),
                 color: Colors.red,
                 onPressed: () => setState(() {
-                  usedPlayers.remove(player);
-                  gameplay.playerRefs = usedPlayers.map((player) => player.dbRef);
+                  addedPlayers.remove(player);
+                  updateGameplayPlayerList(addedPlayers);
                   onPlayerListChange(gameplay);
                 }),
               ),
@@ -350,11 +364,18 @@ class _PlayerListState extends State<PlayerList> {
     });
   }
 
+  void updateGameplayPlayerList(List<Player> pList) {
+    gameplay.playerRefs.clear();
+    for (Player p in pList) {
+      gameplay.playerRefs.add(p.dbRef);
+    }    
+  }
+
   List<Widget> buildDialogPlayerOptions() {
     List<Widget> options = [];
 
     for (Player player in allSavedPlayers) {
-      if (usedPlayers.contains(player)) continue;
+      if (addedPlayers.contains(player)) continue;
       options.add(
         SimpleDialogOption(
           child: Row(

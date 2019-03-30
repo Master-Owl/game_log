@@ -65,8 +65,8 @@ class MyApp extends StatelessWidget {
             button: TextStyle(fontSize: 28.0, fontWeight: FontWeight.w300),
             subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
-      ),
-      home: MainAppRoutes(),
+      ),      
+      initialRoute: '/',
       onGenerateRoute: (settings) {
         Map<String, dynamic> args = settings.arguments;
         switch (settings.name) {
