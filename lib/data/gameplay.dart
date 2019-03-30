@@ -52,11 +52,24 @@ class GamePlay {
     }
   }
 
+  static GamePlay clone(GamePlay play) {
+    GamePlay clone = GamePlay(play.game, []);
+    clone.playerRefs = List.from(play.playerRefs);
+    clone.teams = Map.from(play.teams);
+    clone.scores = Map.from(play.scores);
+    clone.winners = List.from(play.winners);
+    clone.playDate = play.playDate;
+    clone.playTime = play.playTime;
+    clone.wonGame = play.wonGame;
+    clone.dbRef = play.dbRef;
+    return clone;
+  }
+
   void _determineWinners() {
     dynamic winningScore;
-    winners = [];
     switch (game.condition) {
       case WinConditions.score_highest:
+        winners = [];
         winningScore = -double.infinity;
         for (String player in scores.keys) {
           int score = scores[player];
@@ -71,6 +84,7 @@ class GamePlay {
         }
         break;
       case WinConditions.score_lowest:
+        winners = [];
         winningScore = double.infinity;
         for (String player in scores.keys) {
           int score = scores[player];

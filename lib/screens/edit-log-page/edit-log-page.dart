@@ -38,12 +38,7 @@ class _EditLogState extends State<EditLogPage> {
 
     isNewLog = gameplay == null;
     if (isNewLog) gameplay = new GamePlay(Game(), []);
-    modifiedGameplay = new GamePlay(Game(), []);
-
-    modifiedGameplay.playerRefs = List.from(gameplay.playerRefs);
-    modifiedGameplay.scores = Map.from(gameplay.scores);
-    modifiedGameplay.teams = Map.from(gameplay.teams);
-    modifiedGameplay.wonGame = gameplay.wonGame;
+    modifiedGameplay = GamePlay.clone(gameplay);
 
     playDate = gameplay.playDate;
     playTime = gameplay.playTime;
@@ -61,8 +56,9 @@ class _EditLogState extends State<EditLogPage> {
               Text('Won', style: textStyle),
               Spacer(),
               Checkbox(
-                value: modifiedGameplay.winners.length > 0,
+                value: modifiedGameplay.wonGame,
                 onChanged: (won) {
+                  modifiedGameplay.wonGame = won;
                   if (won) {
                     setState(() {                      
                       modifiedGameplay.winners.clear();
@@ -218,7 +214,9 @@ class _EditLogState extends State<EditLogPage> {
     if (newDuration != null) setState(() => {playTime = newDuration});    
   }
 
-  void saveLog() {
+  void saveLog() {    
+    globalGameplayList.remove(gameplay);
+
     gameplay = modifiedGameplay;
     gameplay.game = game;
     gameplay.playTime = playTime;
@@ -233,6 +231,7 @@ class _EditLogState extends State<EditLogPage> {
       gameplay.dbRef.updateData(gameplay.serialize());
     }
 
+    globalGameplayList.add(gameplay);
     Navigator.pop(context, gameplay);
   }
 

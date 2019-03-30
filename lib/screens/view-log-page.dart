@@ -5,6 +5,7 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key: key);
@@ -42,15 +43,15 @@ class _ViewLogState extends State<ViewLogPage>
         fontWeight: FontWeight.w300, fontSize: 28.0, color: defaultGray);
     TextStyle datetime = TextStyle(
         fontWeight: FontWeight.w500, fontSize: 22.0, color: defaultGray);
-    String playersTitle =
-        gameplay.game.type == GameType.team ? 'Teams' : 'Players';
 
     Widget playersWidget = players.length > 0
         ? ListView(
             padding: EdgeInsets.only(left: 10.0, top: 6.0),
             itemExtent: 45.0,
             shrinkWrap: true,
-            children: buildPlayerList(),
+            children: gameplay.game.type == GameType.team ?
+              buildTeamList() :
+              buildPlayerList(),
           )
         : Center(child: CircularProgressIndicator(value: null));
 
@@ -112,7 +113,7 @@ class _ViewLogState extends State<ViewLogPage>
                           )),
                       Padding(
                           padding: EdgeInsets.only(top: 24.0),
-                          child: Text(playersTitle, style: title)),
+                          child: Text('Players', style: title)),
                       playersWidget,
                       Padding(
                           padding: EdgeInsets.only(top: 26.0),
@@ -127,8 +128,9 @@ class _ViewLogState extends State<ViewLogPage>
                                   context, '/edit-log-page',
                                   arguments: {'gameplay': gameplay});
                               if (changed != null && changed != gameplay) {
-                                setState(() async {
-                                  players = await changed.getPlayers();
+                                List<Player> changedPlayers = await changed.getPlayers();
+                                setState(() {
+                                  players = changedPlayers;
                                   gameplay = changed;
                                 });
                               }
@@ -138,92 +140,45 @@ class _ViewLogState extends State<ViewLogPage>
   }
 
   List<Widget> buildPlayerList() {
-    int playerOrTeamIdx = 0;
     List<Widget> tiles = [];
-    List<Color> colors = [
-      Colors.green,
-      Colors.purple,
-      Colors.red,
-      Colors.blue,
-      Colors.teal
-    ];
-    colors.shuffle();
-    Map<String, Color> teamColors = {};
 
     for (Player player in players) {
-      Color tileColor;
+      Color tileColor = player.color;
       Widget appendedWidget = Container();
 
-      switch (gameplay.game.type) {
-        case GameType.standard:
-          tileColor = player.color;
-          switch(gameplay.game.condition) {
-            case WinConditions.score_highest:
-            case WinConditions.score_lowest:
-              Widget pointText = RichText(
-                text: TextSpan(
-                    text: gameplay.scores[player.dbRef.documentID].toString(),
-                    style: TextStyle(fontWeight: FontWeight.bold, color:defaultGray, fontSize: 16.0),
-                    children: [
-                      TextSpan(
-                          text: ' Pts',
-                          style: TextStyle(
-                              fontWeight: FontWeight.w400, color: defaultGray))
-                    ]),
-              );
+      switch(gameplay.game.condition) {
+        case WinConditions.score_highest:
+        case WinConditions.score_lowest:
+          Widget pointText = RichText(
+            text: TextSpan(
+                text: gameplay.scores[player.dbRef.documentID].toString(),
+                style: TextStyle(fontWeight: FontWeight.bold, color:defaultGray, fontSize: 16.0),
+                children: [
+                  TextSpan(
+                      text: ' Pts',
+                      style: TextStyle(
+                          fontWeight: FontWeight.w400, color: defaultGray))
+                ]),
+          );
 
-              if (gameplay.winners.contains(player.dbRef.documentID)) {
-                appendedWidget = Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [winnerIcon,pointText]
-                  ),
-                );
-              } else {
-                appendedWidget = pointText;
-              }
-              break;
-            case WinConditions.single_loser:
-            case WinConditions.single_winner:
-              if (gameplay.winners.contains(player.dbRef.documentID)) {
-                appendedWidget = winnerIcon;
-              }
-              break;
-            default: break;
-          }      
-          break;
-
-        case GameType.cooperative:
-          tileColor = Theme.of(context).accentColor;
-          break;
-
-        case GameType.team:
-          String team = '';
-          for (String teamName in gameplay.teams.keys) {
-            if (gameplay.teams[teamName].contains(player.dbRef)) {
-              team = teamName;
-              break;
-            }
-          }
-
-          // debug
-          assert(team != '');
-
-          if (teamColors[team] != null) {
-            tileColor = teamColors[team];
+          if (gameplay.winners.contains(player.dbRef.documentID)) {
+            appendedWidget = Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [winnerIcon,pointText]
+              ),
+            );
           } else {
-            if (int.tryParse(team) != null) {
-              tileColor = colors[int.parse(team)];
-            } else {
-              tileColor = colors[playerOrTeamIdx++];
-            }
-            teamColors.putIfAbsent(team, () => tileColor);
+            appendedWidget = pointText;
           }
-
-          if (gameplay.winners.contains(team)) {
+          break;
+        case WinConditions.single_loser:
+        case WinConditions.single_winner:
+          if (gameplay.winners.contains(player.dbRef.documentID)) {
             appendedWidget = winnerIcon;
           }
           break;
+        default: break;
       }
 
       tiles.add(Row(children: [
@@ -239,5 +194,45 @@ class _ViewLogState extends State<ViewLogPage>
     }
 
     return tiles;
+  }
+
+  List<Widget> buildTeamList() {
+    List<Widget> tiles = [];
+
+    for (String teamName in gameplay.teams.keys) {
+      List<DocumentReference> pRefs = gameplay.teams[teamName];
+      bool teamWon = gameplay.winners.contains(teamName);
+      tiles.add(Row(children: [
+        Text(teamName, style: TextStyle(fontSize: 24.0)),
+        Spacer(),
+        teamWon ? winnerIcon : Container()
+      ]));
+
+      for (DocumentReference pRef in pRefs) {
+        Player p = getPlayerFromRef(pRef);
+        if (p != null) {
+          tiles.add(Padding(
+            padding: EdgeInsets.only(left: 24.0),
+            child: Row(children: [
+              Container(
+                color: p.color,
+                padding: EdgeInsets.all(2.0),
+                margin: EdgeInsets.fromLTRB(0, 2.0, 8.0, 2.0),
+              ),
+              Text(p.name),
+            ]))
+          );
+        }
+      }
+    }
+
+    return tiles;
+  }
+
+  Player getPlayerFromRef(DocumentReference ref) {
+    for (Player p in globalPlayerList) {
+      if (p.dbRef == ref) return p;
+    }
+    return null;
   }
 }

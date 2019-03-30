@@ -139,9 +139,7 @@ class _LogsPageState extends State<LogsPage>
 
             if (changedPlay != null && changedPlay != play) {
               setState(() {
-                int idx = gameplays.indexOf(play);
-                gameplays.removeAt(idx);
-                gameplays.insert(idx, changedPlay);
+                gameplays = globalGameplayList;
               });
             }
           },
@@ -152,6 +150,7 @@ class _LogsPageState extends State<LogsPage>
           if (deleteLog != null && deleteLog) {
             await play.dbRef.delete();
             setState(() {
+              globalGameplayList.remove(play);
               gameplays.remove(play); 
             });
           }
@@ -197,6 +196,7 @@ class _LogsPageState extends State<LogsPage>
       List<String> winners;
       Map<String, List<DocumentReference>> teams;
       Map<String, int> scores;
+      bool won;
 
       if (doc.data['winners'] != null) {
         winners = [];
@@ -222,6 +222,10 @@ class _LogsPageState extends State<LogsPage>
         }
       }
 
+      if (doc.data['won'] != null) {
+        won = doc.data['won'];
+      }
+
       if (doc.data['scores'] != null) {
         scores = {};
         for (String pRefId in doc.data['scores'].keys) {
@@ -241,6 +245,7 @@ class _LogsPageState extends State<LogsPage>
           teams: teams,
           scores: scores,
           winners: winners,
+          wonGame: won,
           dbRef: doc.reference));
     }
 
