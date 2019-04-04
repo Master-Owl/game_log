@@ -6,6 +6,9 @@ import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_time_patterns.dart';
 
 class ViewLogPage extends StatefulWidget {
   ViewLogPage({Key key, this.gameplay}) : super(key: key);
@@ -36,7 +39,7 @@ class _ViewLogState extends State<ViewLogPage>
   }
 
   @override
-  Widget build(BuildContext context) {    
+  Widget build(BuildContext context) {  
     TextStyle headline = TextStyle(
         fontWeight: FontWeight.w300, fontSize: 42.0, color: defaultGray);
     TextStyle title = TextStyle(
@@ -44,11 +47,26 @@ class _ViewLogState extends State<ViewLogPage>
     TextStyle datetime = TextStyle(
         fontWeight: FontWeight.w500, fontSize: 22.0, color: defaultGray);
 
+    Widget wonIndicator = gameplay.game.condition == WinConditions.all_or_nothing ?
+      Padding(
+        padding: EdgeInsets.only(top: 8.0),
+        child: Row(
+          children: [
+            Text('Won: ', style: title),
+            Icon(
+              gameplay.wonGame ? Icons.check : Icons.close, 
+              color: gameplay.wonGame ? Theme.of(context).primaryColor : Theme.of(context).errorColor,
+              size: 32.0,
+            )
+          ])) :
+      Container(height: 0);
+
     Widget playersWidget = players.length > 0
         ? ListView(
             padding: EdgeInsets.only(left: 10.0, top: 6.0),
             itemExtent: 45.0,
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             children: gameplay.game.type == GameType.team ?
               buildTeamList() :
               buildPlayerList(),
@@ -58,7 +76,8 @@ class _ViewLogState extends State<ViewLogPage>
     animController.forward();
 
     return Scaffold(
-        body: Container(
+        body: SingleChildScrollView(
+          child: Container(
             padding: EdgeInsets.only(
                 left: lrPadding, right: lrPadding, top: headerPaddingTop),
             child: FadeTransition(
@@ -83,7 +102,7 @@ class _ViewLogState extends State<ViewLogPage>
                             flex: 2),
                         Spacer(flex: 1),
                         Center(
-                          child: Text(gameplay.game.name, style: headline),
+                          child: AutoSizeText(gameplay.game.name, style: headline, maxLines: 2),
                         ),
                         Spacer(flex: 3)
                       ]),
@@ -95,7 +114,7 @@ class _ViewLogState extends State<ViewLogPage>
                                   style: title,
                                   children: [
                                 TextSpan(
-                                    text: formatDate(gameplay.playDate),
+                                    text: DateFormat.yMMMMd('en_US').format(gameplay.playDate),
                                     style: datetime)
                               ]))),
                       Padding(
@@ -111,9 +130,15 @@ class _ViewLogState extends State<ViewLogPage>
                               ],
                             ),
                           )),
+                      wonIndicator,
                       Padding(
-                          padding: EdgeInsets.only(top: 24.0),
+                          padding: EdgeInsets.only(top: 16.0, bottom: 8.0),
                           child: Text('Players', style: title)),
+                      Divider(
+                        indent: 0,
+                        height: 0.5,
+                        color: defaultBlack,
+                      ),
                       playersWidget,
                       Padding(
                           padding: EdgeInsets.only(top: 26.0),
@@ -136,7 +161,7 @@ class _ViewLogState extends State<ViewLogPage>
                               }
                             },
                           )))
-                    ]))));
+                    ])))));
   }
 
   List<Widget> buildPlayerList() {
@@ -181,19 +206,33 @@ class _ViewLogState extends State<ViewLogPage>
         default: break;
       }
 
-      tiles.add(Row(children: [
-        Container(
-          color: tileColor,
-          padding: EdgeInsets.all(2.0),
-          margin: EdgeInsets.fromLTRB(0, 2.0, 8.0, 2.0),
-        ),
-        Text(player.name),
-        Spacer(),
-        appendedWidget
-      ]));
+      tiles.add(InkWell(
+        onTap: () => _goToPlayerPage(player),
+        child: Row(
+          children: [
+            Container(
+              color: tileColor,
+              padding: EdgeInsets.all(2.0),
+              margin: EdgeInsets.fromLTRB(0, 2.0, 8.0, 2.0),
+            ),
+            Text(player.name),
+            Spacer(),
+            appendedWidget
+      ])));
     }
 
     return tiles;
+  }
+
+  void _goToPlayerPage(Player p) async {
+    Player changedPlayer = await Navigator.pushNamed<Player>(context, '/edit-player-page',
+        arguments: {'player': p});
+    if (changedPlayer != null && changedPlayer != p) {
+      setState(() {
+        players.remove(p);
+        players.add(changedPlayer);
+      });
+    }
   }
 
   List<Widget> buildTeamList() {
@@ -213,14 +252,17 @@ class _ViewLogState extends State<ViewLogPage>
         if (p != null) {
           tiles.add(Padding(
             padding: EdgeInsets.only(left: 24.0),
-            child: Row(children: [
-              Container(
-                color: p.color,
-                padding: EdgeInsets.all(2.0),
-                margin: EdgeInsets.fromLTRB(0, 2.0, 8.0, 2.0),
-              ),
-              Text(p.name),
-            ]))
+            child: 
+            InkWell(
+              onTap: () => _goToPlayerPage(p),
+              child: Row(children: [
+                Container(
+                  color: p.color,
+                  padding: EdgeInsets.all(2.0),
+                  margin: EdgeInsets.fromLTRB(0, 2.0, 8.0, 2.0),
+                ),
+                Text(p.name),
+            ])))
           );
         }
       }

@@ -53,6 +53,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           crossAxisCount: 2,
                           crossAxisSpacing: 10.0,
                           mainAxisSpacing: 10.0,
+                          physics: NeverScrollableScrollPhysics(),
                           children: animateCards(Duration(milliseconds: 550),
                               Duration(milliseconds: 150))),
                     )

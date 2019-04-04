@@ -38,9 +38,6 @@ class GamePlay {
     if (scores == null) {
       scores = {};
     }
-    if (winners == null) {
-      _determineWinners();
-    }
     if (playDate == null) {
       playDate = DateTime.now();
     }
@@ -49,6 +46,9 @@ class GamePlay {
     }
     if (wonGame == null) {
       wonGame = false;
+    }
+    if (winners == null) {
+      _determineWinners();
     }
   }
 
@@ -99,6 +99,7 @@ class GamePlay {
         }
         break;
       case WinConditions.all_or_nothing:
+        winners = [];
         winners.clear();
         if (wonGame) {
           for (DocumentReference pRef in playerRefs) {
