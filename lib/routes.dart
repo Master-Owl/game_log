@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:game_log/screens/home-page.dart';
-import 'package:game_log/screens/logs-page.dart';
-import 'package:game_log/screens/games-page.dart';
+import 'package:game_log/screens/other/home-page.dart';
+import 'package:game_log/screens/logs/logs-page.dart';
+import 'package:game_log/screens/games/games-page.dart';
 import 'package:game_log/data/globals.dart';
 
 class MainAppRoutes extends StatefulWidget {
