@@ -67,7 +67,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _addGame() {
-    Navigator.pushNamed(context, '/edit-game-page', arguments: {'game': null});
+    Navigator.pushNamed(context, '/edit-game-page', 
+        arguments: {'game': null});
   }
 
   void _addPlayer() {

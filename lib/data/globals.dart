@@ -6,6 +6,7 @@ import 'package:game_log/widgets/slide-transition.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/player.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 // https://medium.com/flutter-community/reactive-programming-streams-bloc-6f0d2bd2d248
 StreamController<int> tabIdxController = StreamController<int>.broadcast();
@@ -29,6 +30,8 @@ const IconData messageBubbleIcon = IconData(0xe9e6, fontFamily: 'icomoon');
 const IconData addSquare = IconData(0xe9e4, fontFamily: 'icomoon');
 const IconData addGameIcon = IconData(0x0042, fontFamily: 'gamelog');
 const IconData gameIcon = IconData(0x0043, fontFamily: 'gamelog');
+
+FirebaseUser currentUser;
 
 Animation<Offset> slideAnimation(AnimationController animController, SlideDirection dir) {
   return Tween<Offset>(

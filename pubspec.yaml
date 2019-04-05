@@ -19,10 +19,10 @@ dependencies:
   # splashscreen: ^1.2.0
   # flutter_circular_chart: ^0.1.0
   # smooth_star_rating: ^1.0.1
-  firebase_core: ^0.3.1+1  # add dependency for Firebase Core
-  firebase_analytics: ^2.0.3  # add dependency for Google Analytics for Firebase
-  # firebase_auth: ^0.8.3
-  cloud_firestore: ^0.9.5+2
+  firebase_core: 0.2.5+1
+  firebase_analytics: 1.1.0
+  firebase_auth: 0.7.0
+  cloud_firestore: 0.8.2+3
   flutter_colorpicker: ^0.2.2
   flutter_duration_picker: ^1.0.0
   auto_size_text: ^1.1.1
