@@ -96,12 +96,10 @@ class _LogsPageState extends State<LogsPage>
           floatingActionButton: FloatingActionButton(
             child: Icon(Icons.add, color: Colors.white),
             onPressed: () async {
-              GamePlay newPlay = await Navigator.pushNamed(
+              await Navigator.pushNamed(
                   context, '/edit-log-page',
                   arguments: {'gameplay': null});
-              if (newPlay != null) {
-                setState(() => {gameplays.add(newPlay)});
-              }
+              setState(() => {gameplays = globalGameplayList});
             },
           ),
         ));

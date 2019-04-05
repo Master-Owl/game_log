@@ -21,7 +21,7 @@ dependencies:
   # smooth_star_rating: ^1.0.1
   firebase_core: ^0.3.1+1  # add dependency for Firebase Core
   firebase_analytics: ^2.0.3  # add dependency for Google Analytics for Firebase
-  firebase_auth: ^0.8.3
+  # firebase_auth: ^0.8.3
   cloud_firestore: ^0.9.5+2
   flutter_colorpicker: ^0.2.2
   flutter_duration_picker: ^1.0.0

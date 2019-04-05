@@ -93,7 +93,13 @@ class _EditLogState extends State<EditLogPage> {
     actions.add(IconButton(
         icon: Icon(Icons.save, color: defaultBlack),
         tooltip: 'Save',
-        onPressed: saveLog));
+        disabledColor: defaultGray,
+        onPressed:  modifiedGameplay.game.dbRef != null &&
+                    modifiedGameplay.playerRefs.length >= 1 ? 
+                  saveLog : 
+                  null
+          )
+        );
 
     return Scaffold(
         appBar: AppBar(            
@@ -207,6 +213,11 @@ class _EditLogState extends State<EditLogPage> {
     if (newDate != null) setState(() => {playDate = newDate});
   }
 
+  bool fieldsValidated(){   
+    return modifiedGameplay.game != null &&
+      modifiedGameplay.playerRefs.length >= 1;  
+  }
+
   void openDurationPicker() async {
     Duration newDuration = await showDurationPicker(
         context: context, initialTime: playTime, snapToMins: 1.0);
@@ -214,8 +225,11 @@ class _EditLogState extends State<EditLogPage> {
     if (newDuration != null) setState(() => {playTime = newDuration});    
   }
 
-  void saveLog() {    
-    globalGameplayList.remove(gameplay);
+  void saveLog() {
+    if (!isNewLog){
+      globalGameplayList.remove(gameplay);
+      globalGameplayList.remove(modifiedGameplay);
+    }
 
     gameplay = modifiedGameplay;
     gameplay.game = game;
