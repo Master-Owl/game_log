@@ -12,6 +12,7 @@ import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/screens/other/settings-page.dart';
 import 'package:game_log/screens/other/login-page.dart';
+import 'package:game_log/utils/auth.dart';
 import 'routes.dart';
 
 void main() => runApp(new MyApp());
@@ -67,19 +68,19 @@ class MyApp extends StatelessWidget {
             subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
       ),
-      home: LoginPage(),
-      // initialRoute: '/',
-      // onGenerateRoute: (settings) {
-      //   Map<String, dynamic> args = settings.arguments;
-      //   switch (settings.name) {
-      //     case '/': return MaterialPageRoute(builder: (context) => MainAppRoutes());
-      //     case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
-      //     case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
-      //     case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
-      //     case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
-      //     case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());
-      //   }
-      // },
+      home: AuthenticationWidget(Container(), MainAppRoutes(), LoginPage()),
+      initialRoute: '/',
+      onGenerateRoute: (settings) {
+        Map<String, dynamic> args = settings.arguments;
+        switch (settings.name) {
+          case '/': return MaterialPageRoute(builder: (context) => MainAppRoutes());
+          case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
+          case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
+          case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
+          case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
+          case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());
+        }
+      },
     );
   }
 

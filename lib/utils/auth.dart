@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:game_log/data/globals.dart';
 
-Widget authenticationWidget(
+Widget AuthenticationWidget(
   Widget waitingScreen, 
-  Widget Function(FirebaseUser) authenticatedScreen, 
+  Widget authenticatedScreen, 
   Widget unauthenticatedScreen) {
     return new StreamBuilder<FirebaseUser>(
       stream: FirebaseAuth.instance.onAuthStateChanged,
@@ -13,7 +14,9 @@ Widget authenticationWidget(
           return waitingScreen;
         } else {
           if (snapshot.hasData) {
-            return authenticatedScreen(snapshot.data);
+            if (currentUser == null)
+              currentUser = snapshot.data;
+            return authenticatedScreen;
           }
           return unauthenticatedScreen;
         }
