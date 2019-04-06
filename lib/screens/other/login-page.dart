@@ -1,10 +1,10 @@
-import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/auth.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:game_log/data/user.dart';
 
 class LoginPage extends StatefulWidget {
   LoginPage({ Key key }) : super(key: key);
@@ -141,13 +141,11 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });       
     animController.repeat();
 
-    dynamic response = await tryLogin(email, password);
-    // await Future.delayed(Duration(milliseconds: 3300));
+    dynamic response = await AuthenticationWidget.tryLogin(email, password);
     animController.animateTo(1.0);
 
     if (response is FirebaseUser) {
-      print('Login success!');
-      currentUser = response;
+      print('Login success!');      
     } 
     else {
       switch (response.code) {

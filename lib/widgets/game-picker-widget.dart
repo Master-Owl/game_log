@@ -4,6 +4,7 @@ import 'package:game_log/widgets/autocomplete-textfield.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/data/game.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/data/user.dart';
 
 class GamePickerWidget extends StatefulWidget {
   GamePickerWidget({Key key, this.selectedGame, @required this.onItemSelected})
@@ -89,7 +90,7 @@ class _GamePickerState extends State<GamePickerWidget> {
 
   void getGames() async {
     QuerySnapshot qs =
-        await Firestore.instance.collection('games').getDocuments();
+        await CurrentUser.ref.collection('games').getDocuments();
     globalGameList.clear();
     for (DocumentSnapshot doc in qs.documents) {
       globalGameList.add(Game(

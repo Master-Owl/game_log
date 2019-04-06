@@ -31,8 +31,6 @@ const IconData addSquare = IconData(0xe9e4, fontFamily: 'icomoon');
 const IconData addGameIcon = IconData(0x0042, fontFamily: 'gamelog');
 const IconData gameIcon = IconData(0x0043, fontFamily: 'gamelog');
 
-FirebaseUser currentUser;
-
 Animation<Offset> slideAnimation(AnimationController animController, SlideDirection dir) {
   return Tween<Offset>(
     begin: dir == SlideDirection.Right ? 

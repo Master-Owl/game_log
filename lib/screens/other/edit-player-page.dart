@@ -6,6 +6,7 @@ import 'package:game_log/widgets/app-text-field.dart';
 import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/utils/helper-funcs.dart';
+import 'package:game_log/data/user.dart';
 
 class EditPlayerPage extends StatefulWidget {
   EditPlayerPage({Key key, this.player}) : super(key: key);
@@ -31,7 +32,7 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
     if (newPlayer) {
       player = Player(name: 'Anonymous', color: Colors.black12); 
     } else {
-      Firestore.instance
+      CurrentUser.ref
         .collection('players')
         .document(player.dbRef.documentID)
         .get()
@@ -169,10 +170,10 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
 
   void updatePlayerDB(Player p) {
     if (p.dbRef == null) {
-      Firestore.instance.collection('players').document()
+      CurrentUser.ref.collection('players').document()
               .setData({ 'name': p.name, 'color': p.color.value });
     } else {
-      Firestore.instance.collection('players').document(p.dbRef.documentID)
+      CurrentUser.ref.collection('players').document(p.dbRef.documentID)
               .updateData({ 'name': p.name, 'color': p.color.value });        
     }
   }

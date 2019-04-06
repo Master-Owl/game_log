@@ -6,7 +6,8 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/widgets/game-picker-widget.dart';
-import './player-list.dart';
+import 'package:game_log/data/user.dart';
+import 'package:game_log/screens/logs/edit-log-page/player-list.dart';
 
 class EditLogPage extends StatefulWidget {
   EditLogPage({Key key, this.gameplay}) : super(key: key);
@@ -237,7 +238,7 @@ class _EditLogState extends State<EditLogPage> {
     gameplay.playDate = playDate;
 
     if (gameplay.dbRef == null) {
-      Firestore.instance
+      CurrentUser.ref
           .collection('gameplays')
           .document()
           .setData(gameplay.serialize());

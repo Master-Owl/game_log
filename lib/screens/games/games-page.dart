@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/animation.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:game_log/data/gameplay.dart';
+import 'package:game_log/data/user.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/widgets/slide-transition.dart';
 
@@ -21,14 +21,14 @@ class _GamesPageState extends State<GamesPage>
   SortGamesBy sortBy;
   List<DropdownMenuItem> sortTypes;
   List<Game> games;
-  bool fetchDB;
+  bool fetched;
 
   @override
   void initState() {
     sortBy = SortGamesBy.alphabetical_ascending;
     sortTypes = [];
     games = globalGameList;
-    fetchDB = games.length == 0;
+    fetched = false;
     for (SortGamesBy type in SortGamesBy.values) {
       sortTypes
           .add(DropdownMenuItem(child: Text(sortByString(type)), value: type));
@@ -37,7 +37,7 @@ class _GamesPageState extends State<GamesPage>
     animController = AnimationController(vsync: this, duration: animDuration);
 
     if (games.length == 0)
-      Firestore.instance.collection('games').getDocuments().then(fetchGameData);
+      CurrentUser.ref.collection('games').getDocuments().then(fetchGameData);
 
     super.initState();
   }
@@ -74,13 +74,20 @@ class _GamesPageState extends State<GamesPage>
                           ])
                     ])
                 ),
-                games.length == 0
+                !fetched
                   ? Padding(
                       padding: EdgeInsets.only(top: 125.0),
                       child: SizedBox(
                           height: 100.0,
                           width: 100.0,
                           child: CircularProgressIndicator(value: null)))
+                  : games.length == 0 
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(18.0),
+                        child: Text('You haven\'t added any games to your collection yet', style: Theme.of(context).textTheme.subtitle)
+                      )
+                  )
                   : Expanded(
                       child: ListView(
                         shrinkWrap: true,
@@ -132,7 +139,6 @@ class _GamesPageState extends State<GamesPage>
             idx = globalGameList.indexOf(game);
             globalGameList.removeAt(idx);
             globalGameList.insert(idx, modifiedGame);
-            // fetchDB = true;
           });
         }
       }));
@@ -175,6 +181,7 @@ class _GamesPageState extends State<GamesPage>
 
     setState(() {
       games = globalGameList;
+      fetched = true;
     });
   }
 

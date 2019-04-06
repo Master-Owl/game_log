@@ -189,6 +189,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     for (AnimationController ctrl in controllers) {
       ctrl.forward();
       await Future.delayed(offset);
-    }
+    }    
+    await Future.delayed(offset*8);
+    for (AnimationController ctrl in controllers) ctrl.dispose();
+  }
+
+  @override
+  void dispose() {
+    animController.dispose();
+    super.dispose();
   }
 }

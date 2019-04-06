@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/data/user.dart';
 
 class EditGamePage extends StatefulWidget {
   EditGamePage({Key key, this.game }) : super(key: key);
@@ -126,8 +126,8 @@ class _EditGameState extends State<EditGamePage> {
         'wincondition': game.winConditionEnumString(),
       };
 
-      if (game.dbRef == null) Firestore.instance.collection('games').document().setData(obj);
-      else Firestore.instance.collection('games').document(game.dbRef.documentID).updateData(obj);
+      if (game.dbRef == null) CurrentUser.ref.collection('games').document().setData(obj);
+      else CurrentUser.ref.collection('games').document(game.dbRef.documentID).updateData(obj);
 
       Navigator.pop(context, game);
     } else {

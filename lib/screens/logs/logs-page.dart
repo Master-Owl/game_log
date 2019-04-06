@@ -4,6 +4,7 @@ import 'package:game_log/data/globals.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/game.dart';
+import 'package:game_log/data/user.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/widgets/slide-transition.dart';
 
@@ -22,11 +23,13 @@ class _LogsPageState extends State<LogsPage>
   SortBy sortBy;
   List<DropdownMenuItem> sortTypes;
   List<GamePlay> gameplays;
+  bool fetched;
 
   @override
   void initState() {
     sortBy = SortBy.alphabetical;
     sortTypes = [];
+    fetched = false;
     gameplays = globalGameplayList;
     for (SortBy type in SortBy.values) {
       sortTypes
@@ -36,7 +39,7 @@ class _LogsPageState extends State<LogsPage>
     animController = AnimationController(vsync: this, duration: animDuration);
 
     if (gameplays.length == 0)
-      Firestore.instance
+      CurrentUser.ref
           .collection('gameplays')
           .getDocuments()
           .then(fetchGameplayData);
@@ -77,7 +80,7 @@ class _LogsPageState extends State<LogsPage>
                       )
                   ])
                 ),
-                gameplays.length == 0
+                !fetched
                   ? Padding(
                       padding: EdgeInsets.only(top: 125.0),
                       child: SizedBox(
@@ -85,7 +88,14 @@ class _LogsPageState extends State<LogsPage>
                           width: 100.0,
                           child: CircularProgressIndicator(value: null))
                     )
-                  : Expanded(
+                  : gameplays.length == 0 
+                  ? Center(
+                      child: Padding(
+                        padding: EdgeInsets.all(18.0),
+                        child: Text('You haven\'t added any logs yet', style: Theme.of(context).textTheme.subtitle)
+                      )
+                  ) :
+                  Expanded(
                       child: ListView(
                           children: getLogList(),
                           shrinkWrap: true,
@@ -106,7 +116,7 @@ class _LogsPageState extends State<LogsPage>
   }
 
   void sortGameplays() {
-    gameplays =globalGameplayList;
+    gameplays = globalGameplayList;
     switch (sortBy) {
       case SortBy.alphabetical:
         gameplays.sort((a, b) => a.game.name.compareTo(b.game.name));
@@ -181,14 +191,25 @@ class _LogsPageState extends State<LogsPage>
       List playerRefs = doc.data['players'];
       playerRefs = List<DocumentReference>.from(playerRefs);
 
-      Game game = await gameRef.get().then((snapshot) {
-        return Game(
-            name: snapshot.data['name'],
-            type: gameTypeFromString(snapshot.data['type']),
-            condition: winConditionFromString(snapshot.data['wincondition']),
-            bggId: snapshot.data['bggid'],
-            dbRef: snapshot.reference);
-      });
+
+      Game game;
+      for (Game g in globalGameList) {
+        if (g.dbRef == gameRef) {
+          game = g;
+          break;
+        }
+      }
+      if (game == null) {
+        game = await gameRef.get().then((snapshot) {
+          return Game(
+              name: snapshot.data['name'],
+              type: gameTypeFromString(snapshot.data['type']),
+              condition: winConditionFromString(snapshot.data['wincondition']),
+              bggId: snapshot.data['bggid'],
+              dbRef: snapshot.reference);
+        });
+        globalGameList.add(game);
+      }
 
       // Optional data
       List<String> winners;
@@ -249,6 +270,7 @@ class _LogsPageState extends State<LogsPage>
 
     setState(() {
       gameplays = globalGameplayList;
+      fetched = true;
     });
   }
 }

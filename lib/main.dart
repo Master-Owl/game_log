@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:game_log/data/user.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/logs/edit-log-page/edit-log-page.dart';
 import 'package:game_log/screens/games/edit-game-page.dart';
@@ -27,9 +27,7 @@ class MyApp extends StatelessWidget {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp
     ]);
-
-    _getAllPlayers();
-
+    
     return new MaterialApp(
       title: 'TBGF: GameLog',
       theme: new ThemeData(
@@ -68,7 +66,11 @@ class MyApp extends StatelessWidget {
             subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
       ),
-      home: AuthenticationWidget(Container(), MainAppRoutes(), LoginPage()),
+      home: CurrentUser.auth == null ? AuthenticationWidget(
+        waitingScreen: Container(),
+        authenticatedScreen: MainAppRoutes(),
+        unauthenticatedScreen: LoginPage(),
+      ) : MainAppRoutes(),
       initialRoute: '/',
       onGenerateRoute: (settings) {
         Map<String, dynamic> args = settings.arguments;
@@ -82,21 +84,5 @@ class MyApp extends StatelessWidget {
         }
       },
     );
-  }
-
-  void _getAllPlayers() {
-    Firestore.instance.collection('players')
-      .getDocuments()
-      .then((snapshot) {
-        List<Player> dbPlayers = [];
-        snapshot.documents.forEach((doc) {
-          dbPlayers.add(Player(
-            name: doc.data['name'],
-            color: Color(doc.data['color']),
-            dbRef: doc.reference
-          ));
-        });
-        globalPlayerList = dbPlayers;
-      });
   }
 }
