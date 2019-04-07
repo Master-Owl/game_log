@@ -19,4 +19,11 @@ class CurrentUser {
     }
     print('SET USER ERROR: The given FirebaseUser was null');
   }
+
+  static void signOut() {
+    auth = null;
+    ref = null;
+    id = '';
+    token = '';
+  }
 }

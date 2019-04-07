@@ -14,6 +14,8 @@ import 'package:game_log/screens/other/settings-page.dart';
 import 'package:game_log/screens/other/login-page.dart';
 import 'package:game_log/utils/auth.dart';
 import 'routes.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:game_log/screens/other/splashscreen.dart';
 
 void main() => runApp(new MyApp());
 
@@ -66,16 +68,16 @@ class MyApp extends StatelessWidget {
             subtitle: TextStyle(fontSize: 16.0, color: defaultGray, fontWeight:FontWeight.w400)
         )
       ),
-      home: CurrentUser.auth == null ? AuthenticationWidget(
-        waitingScreen: Container(),
-        authenticatedScreen: MainAppRoutes(),
-        unauthenticatedScreen: LoginPage(),
-      ) : MainAppRoutes(),
-      initialRoute: '/',
+      initialRoute: '/', // or '/' if user signed in
       onGenerateRoute: (settings) {
         Map<String, dynamic> args = settings.arguments;
         switch (settings.name) {
-          case '/': return MaterialPageRoute(builder: (context) => MainAppRoutes());
+          case '/': return MaterialPageRoute(builder: (context) => AuthenticationWidget(
+            waitingScreen: SplashScreen(),
+            unauthenticatedScreen: LoginPage(),
+          ));
+          // case '/signup-page': return d;
+          case '/home': return MaterialPageRoute(builder: (context) => MainAppRoutes());
           case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
           case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
           case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));

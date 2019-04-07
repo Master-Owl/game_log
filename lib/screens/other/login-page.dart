@@ -58,7 +58,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   Padding(
                     padding: EdgeInsets.only(bottom: spacing),
                     child: AppTextField(
-                      autofocus: true,
+                      // autofocus: true,
                       inputType: TextInputType.emailAddress,
                       label: 'Email',
                       controller: TextEditingController(text: email),
@@ -141,11 +141,12 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });       
     animController.repeat();
 
-    dynamic response = await AuthenticationWidget.tryLogin(email, password);
+    dynamic response = await tryLogin(email, password);
     animController.animateTo(1.0);
 
     if (response is FirebaseUser) {
-      print('Login success!');      
+      CurrentUser.setUser(response);
+      Navigator.pushReplacementNamed(context, '/home');
     } 
     else {
       switch (response.code) {
