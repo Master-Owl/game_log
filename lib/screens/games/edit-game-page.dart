@@ -3,6 +3,7 @@ import 'package:game_log/data/game.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:game_log/data/user.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class EditGamePage extends StatefulWidget {
   EditGamePage({Key key, this.game }) : super(key: key);
@@ -117,7 +118,7 @@ class _EditGameState extends State<EditGamePage> {
     return items;
   }
 
-  void saveGame() {
+  void saveGame() async {
     if (game.name != '') {
       Map<String, dynamic> obj = { 
         'bggid': game.bggId,
@@ -126,9 +127,13 @@ class _EditGameState extends State<EditGamePage> {
         'wincondition': game.winConditionEnumString(),
       };
 
-      if (game.dbRef == null) CurrentUser.ref.collection('games').document().setData(obj);
-      else CurrentUser.ref.collection('games').document(game.dbRef.documentID).updateData(obj);
-
+      if (game.dbRef == null) {
+        game.dbRef = await CurrentUser.ref.collection('games').add(obj);     
+      }
+      else {
+        game.dbRef.updateData(obj);
+      }
+      
       Navigator.pop(context, game);
     } else {
       showDialog(

@@ -226,7 +226,7 @@ class _EditLogState extends State<EditLogPage> {
     if (newDuration != null) setState(() => {playTime = newDuration});    
   }
 
-  void saveLog() {
+  void saveLog() async {
     if (!isNewLog){
       globalGameplayList.remove(gameplay);
       globalGameplayList.remove(modifiedGameplay);
@@ -238,12 +238,9 @@ class _EditLogState extends State<EditLogPage> {
     gameplay.playDate = playDate;
 
     if (gameplay.dbRef == null) {
-      CurrentUser.ref
-          .collection('gameplays')
-          .document()
-          .setData(gameplay.serialize());
+      gameplay.dbRef = await CurrentUser.ref.collection('gameplays').add(gameplay.serialize());
     } else {
-      gameplay.dbRef.updateData(gameplay.serialize());
+      await gameplay.dbRef.updateData(gameplay.serialize());
     }
 
     globalGameplayList.add(gameplay);
@@ -259,8 +256,8 @@ class _EditLogState extends State<EditLogPage> {
       setState(() {
         globalGameplayList.remove(gameplay);
         Navigator.pop(context);
-        Navigator.pushReplacementNamed(context, '/')
-          .then((x) => { tabIdxController.sink.add(tabs['logs']) });        
+        Navigator.pushReplacementNamed(context, '/home');
+        tabIdxController.sink.add(tabs['logs']);
       });
     }
   }

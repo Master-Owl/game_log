@@ -32,17 +32,7 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
     if (newPlayer) {
       player = Player(name: 'Anonymous', color: Colors.black12); 
     } else {
-      CurrentUser.ref
-        .collection('players')
-        .document(player.dbRef.documentID)
-        .get()
-        .then((snapshot) => {
-          setState(() {
-            player.name = name = snapshot.data['name'];
-            player.color = color = Color(snapshot.data['color']);
-          })
-        });
-      name = player.name;
+      name = player.name == null ? '' : player.name;
       color = player.color == null ? Colors.black : player.color;
     }
 
@@ -60,11 +50,12 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
             IconButton(
                 icon: Icon(Icons.save),
                 tooltip: 'Save',
-                onPressed: () {
+                onPressed: () async {
                   player.name = name == '' ? 'Anonymous' : name;
                   player.color = color;
+                  // TODO: find a way to handle anonymous player entries in db
                   if (player.name != 'Anonymous')
-                    updatePlayerDB(player);
+                    player = await updatePlayerDB(player);
 
                   Navigator.pop(context, player);
                 })
@@ -168,13 +159,12 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
     );
   }
 
-  void updatePlayerDB(Player p) {
+  Future<Player> updatePlayerDB(Player p) async {
     if (p.dbRef == null) {
-      CurrentUser.ref.collection('players').document()
-              .setData({ 'name': p.name, 'color': p.color.value });
+      p.dbRef = await CurrentUser.ref.collection('players').add({ 'name': p.name, 'color': p.color.value });
     } else {
-      CurrentUser.ref.collection('players').document(p.dbRef.documentID)
-              .updateData({ 'name': p.name, 'color': p.color.value });        
+      await p.dbRef.updateData({ 'name': p.name, 'color': p.color.value });        
     }
+    return p;
   }
 }
