@@ -38,6 +38,9 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     anim = CurveTween(curve: Curves.easeInOutExpo).animate(animController);
   }
 
+  // TODO: Add error field beneath text fields
+  // TODO: Create signup page
+
   @override
   Widget build(BuildContext context) {
     double sidePadding = 38.0;
