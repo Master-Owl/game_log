@@ -1,3 +1,4 @@
+import 'routes.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:game_log/data/user.dart';
@@ -11,11 +12,11 @@ import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/player.dart';
 import 'package:game_log/data/game.dart';
 import 'package:game_log/screens/other/settings-page.dart';
-import 'package:game_log/screens/other/login-page.dart';
-import 'package:game_log/utils/auth.dart';
-import 'routes.dart';
+import 'package:game_log/screens/auth/login-page.dart';
+import 'package:game_log/screens/auth/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_log/screens/other/splashscreen.dart';
+import 'package:game_log/screens/auth/signup-page.dart';
 
 void main() => runApp(new MyApp());
 
@@ -74,7 +75,8 @@ class MyApp extends StatelessWidget {
         switch (settings.name) {
           case '/': return MaterialPageRoute(builder: (context) => AuthenticationWidget(
             waitingScreen: SplashScreen(),
-            unauthenticatedScreen: LoginPage(),
+            loginScreen: LoginPage(),
+            signupScreen: SignupPage(),
           ));
           // case '/signup-page': return d;
           case '/home': return MaterialPageRoute(builder: (context) => MainAppRoutes());

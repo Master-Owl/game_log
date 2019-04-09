@@ -3,31 +3,33 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_log/data/user.dart';
 
+StreamController<int> authStateController = StreamController<int>.broadcast();
+
 class AuthenticationWidget extends StatefulWidget {
-  AuthenticationWidget({this.waitingScreen, this.unauthenticatedScreen, Key key}) :
+  AuthenticationWidget({this.waitingScreen, this.loginScreen, this.signupScreen,  key}) :
     super(key: key);
 
   final Widget waitingScreen;
-  final Widget unauthenticatedScreen;
+  final Widget loginScreen;
+  final Widget signupScreen;
 
   @override
-  _AuthenticationWidgetState createState() => _AuthenticationWidgetState(waitingScreen, unauthenticatedScreen);
+  _AuthenticationWidgetState createState() => _AuthenticationWidgetState(waitingScreen, loginScreen, signupScreen);
 }
 
 class _AuthenticationWidgetState extends State<AuthenticationWidget> {
-  _AuthenticationWidgetState(this.waitingScreen, this.unauthenticatedScreen) : super();
+  _AuthenticationWidgetState(this.waitingScreen, this.loginScreen, this.signupScreen) : super();
 
   Widget waitingScreen;
-  Widget unauthenticatedScreen;
-  int authStatus; // 0 == false, 1 == true, -1 == undetermined
+  Widget loginScreen;
+  Widget signupScreen;
 
   @override
   void initState() {
     super.initState();
-    authStatus = -1;
     FirebaseAuth.instance.currentUser().then((user) {
       setState(() {
-        authStatus = user != null ? 1 : 0;
+        authStateController.add(user == null ? 1 : 3);
         if (user != null) CurrentUser.setUser(user);
       });
     });
@@ -35,13 +37,23 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    switch(authStatus) {
-      case -1: return waitingScreen;
-      case 0: return unauthenticatedScreen;
-      default:
-        Navigator.pushReplacementNamed(context, '/home');
-        return unauthenticatedScreen;
-    }
+    return StreamBuilder(
+      initialData: 0,
+      stream: authStateController.stream,
+      builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+        if (snapshot.hasData) {
+          switch(snapshot.data) {
+            case 0: return waitingScreen;
+            case 1: return loginScreen;
+            case 2: return signupScreen;
+            default:
+              Navigator.pushReplacementNamed(context, '/home');
+              return waitingScreen;
+          }
+        }
+        return waitingScreen;
+      },
+    );
   }
 }
 
