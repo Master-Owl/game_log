@@ -20,6 +20,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   AnimationController animController;
   Animation<double> anim;
+  Widget errorMessageWidget;
   bool loggingIn;
 
   @override
@@ -36,9 +37,9 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
 
     anim = CurveTween(curve: Curves.easeInOutExpo).animate(animController);
+    errorMessageWidget = Container(height: 0);
   }
 
-  // TODO: Add error field beneath text fields
   // TODO: Create signup page
 
   @override
@@ -85,6 +86,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                       child: Text('Sign In'),
                     ),
                   ),
+                  errorMessageWidget,
                   Flexible(
                     flex: 3,
                     child: Padding(
@@ -152,14 +154,36 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       Navigator.pushReplacementNamed(context, '/home');
     } 
     else {
+      String errText = '';
       switch (response.code) {
         case 'ERROR_WRONG_PASSWORD': 
-          print('wrong password');
+          errText = 'That password is incorrect.';
+          break;
+        case 'ERROR_USER_NOT_FOUND':
+          errText = 'That username isn\'t registered.';
+          break;
+        case 'ERROR_EMAIL_ALREADY_IN_USE':
+        case 'ERROR_ACCOUNT_EXISTS_WITH_DIFFERENT_CREDENTIAL':
+          errText = 'That email has already been registered.';
+          break;
+        case 'ERROR_INVALID_EMAIL':
+          errText = 'The email provided is invalid.';
+          break;
+        case 'ERROR_OPERATION_NOT_ALLOWED':
+          errText = 'That operation isn\'t allowed. What did you even do?';
+          break;
+        case 'ERROR_NETWORK_REQUEST_FAILED':
+          errText = 'There was a network error. Please try again shortly.';
           break;
         default:
-          print('Unknown error');
+          errText = response.message;
           break;
       }
+      setState(() {
+        errorMessageWidget = Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text(errText, style: TextStyle(color: Theme.of(context).errorColor)));
+      });
     } 
 
     setState(() {

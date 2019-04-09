@@ -25,5 +25,6 @@ class CurrentUser {
     ref = null;
     id = '';
     token = '';
+    FirebaseAuth.instance.signOut();
   }
 }
