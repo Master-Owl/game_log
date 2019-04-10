@@ -72,19 +72,21 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
   }
 
   void _getAllPlayers() {
-    CurrentUser.ref
-      .collection('players')
-      .getDocuments()
-      .then((snapshot) {
-        List<Player> dbPlayers = [];
-        snapshot.documents.forEach((doc) {
-          dbPlayers.add(Player(
-            name: doc.data['name'],
-            color: Color(doc.data['color']),
-            dbRef: doc.reference
-          ));
+    if (CurrentUser.ref != null) {
+      CurrentUser.ref
+        .collection('players')
+        .getDocuments()
+        .then((snapshot) {
+          List<Player> dbPlayers = [];
+          snapshot.documents.forEach((doc) {
+            dbPlayers.add(Player(
+              name: doc.data['name'],
+              color: Color(doc.data['color']),
+              dbRef: doc.reference
+            ));
+          });
+          globalPlayerList = dbPlayers;
         });
-        globalPlayerList = dbPlayers;
-      });
+    }
   }
 }

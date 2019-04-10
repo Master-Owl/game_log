@@ -15,6 +15,8 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   String email;
   String password;
   String passwordVerify;
+  String name;
+
   bool makingNetworkCall;
   Widget errorMessageWidget;
 
@@ -40,7 +42,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     double maxHeight = MediaQuery.of(context).size.height;
     double sidePadding = 38.0;
-    double spacing = 18.0;
+    double spacing = 8.0;
     return Scaffold(
       body: SingleChildScrollView(
         physics: NeverScrollableScrollPhysics(),
@@ -72,6 +74,15 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                     padding: EdgeInsets.only(bottom: spacing),
                     child: AppTextField(
                       inputType: TextInputType.emailAddress,
+                      label: 'Name',
+                      controller: TextEditingController(text: name),
+                      onChanged: _updateNameField,           
+                    )
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(bottom: spacing),
+                    child: AppTextField(
+                      inputType: TextInputType.emailAddress,
                       label: 'Email',
                       controller: TextEditingController(text: email),
                       onChanged: _updateEmailField,           
@@ -88,7 +99,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                     )
                   ),
                   Padding(
-                    padding: EdgeInsets.only(bottom: spacing + 8.0),
+                    padding: EdgeInsets.only(bottom: spacing + 4.0),
                     child: AppTextField(
                       label: 'Verify Password',
                       controller: TextEditingController(text: passwordVerify),
@@ -109,7 +120,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                   Container(
                     height: 200.0,
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(lrPadding, headerPaddingTop, lrPadding, lrPadding),
+                      padding: EdgeInsets.all(lrPadding + 4.0),
                       child: AnimatedBuilder(
                         animation: animController,
                         builder: (context, widget) {
@@ -127,7 +138,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
                           );
                         },
                       ) 
-                    ),      
+                    ),
                   ),
                 ]              
               )
@@ -139,30 +150,30 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
   }
 
   void _signUp() async {
-    TextStyle errorTextStyle = TextStyle(color: Theme.of(context).errorColor);
-    if (email == '') {
+    TextStyle errorTextStyle = TextStyle(color: Theme.of(context).errorColor, fontSize: 12.0);
+    if (email == null || email == '') {
       setState(() {        
         errorMessageWidget = Padding(
           padding: EdgeInsets.only(top: 8.0),
-          child: Text('Email must be provided.', style: errorTextStyle)
+          child: Text('Email must be provided.', style: errorTextStyle, maxLines: 2)
         );
       });
       return;
     }
-    if (password == '') {
+    if (password == null || password == '') {
       setState(() {        
         errorMessageWidget = Padding(
           padding: EdgeInsets.only(top: 8.0),
-          child: Text('Password cannot be blank.', style: errorTextStyle)
+          child: Text('Password cannot be blank.', style: errorTextStyle, maxLines: 2)
         );
       });
       return;
     }
-    if (passwordVerify == '') {
+    if (passwordVerify == null || passwordVerify == '') {
       setState(() {        
         errorMessageWidget = Padding(
           padding: EdgeInsets.only(top: 8.0),
-          child: Text('Please verify your password.', style: errorTextStyle)
+          child: Text('Please verify your password.', style: errorTextStyle, maxLines: 2)
         );
       });
       return;
@@ -177,7 +188,7 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     animController.animateTo(1.0);
 
     if (response is FirebaseUser) {
-      CurrentUser.setUser(response);
+      CurrentUser.setNewUser(response, name);
       Navigator.pushReplacementNamed(context, '/home');
     } 
     else {
@@ -237,6 +248,13 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     setState(() {
       if (str == null) passwordVerify = '';
       else passwordVerify = str;
+    });
+  }
+
+  void _updateNameField(String str) {
+    setState(() {
+      if (str == null) name = '';
+      else name = str; 
     });
   }
 

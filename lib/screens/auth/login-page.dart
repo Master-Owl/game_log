@@ -102,7 +102,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   Container(
                     height: 200.0,
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(lrPadding, headerPaddingTop, lrPadding, lrPadding),
+                      padding: EdgeInsets.all(lrPadding + 4.0),
                       child: AnimatedBuilder(
                         animation: animController,
                         builder: (context, widget) {
@@ -152,7 +152,18 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });
   }
 
-  void _signIn() async {   
+  void _signIn() async {
+    TextStyle errorTextStyle = TextStyle(color: Theme.of(context).errorColor, fontSize: 14.0);
+    if (email == null || email == '') {
+      setState(() {        
+        errorMessageWidget = Padding(
+          padding: EdgeInsets.only(top: 8.0),
+          child: Text('Email cannot be blank.', style: errorTextStyle)
+        );
+      });
+      return;
+    }    
+
     setState(() {
       makingNetworkCall = true;
     });       
@@ -194,7 +205,7 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       setState(() {
         errorMessageWidget = Padding(
           padding: EdgeInsets.only(top: 8.0),
-          child: Text(errText, style: TextStyle(color: Theme.of(context).errorColor)));
+          child: Text(errText, style: errorTextStyle, maxLines: 2));
       });
     } 
 
