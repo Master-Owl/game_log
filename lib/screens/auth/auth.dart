@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_log/data/user.dart';
+import 'package:game_log/screens/other/splashscreen.dart';
 
 StreamController<int> authStateController = StreamController<int>.broadcast();
 
@@ -28,10 +29,8 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   void initState() {
     super.initState();
     FirebaseAuth.instance.currentUser().then((user) {
-      setState(() {
-        authStateController.add(user == null ? 1 : 3);
-        if (user != null) CurrentUser.setUser(user);
-      });
+      authStateController.add(user == null ? 1 : 3);
+      if (user != null) CurrentUser.setUser(user);
     });
   }
 
@@ -47,7 +46,9 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
             case 1: return loginScreen;
             case 2: return signupScreen;
             default:
-              Navigator.pushReplacementNamed(context, '/home');
+              Future.delayed(Duration(milliseconds: splashScreenDuration + 100)).then(
+                (x) => Navigator.pushReplacementNamed(context, '/home')
+              );              
               return waitingScreen;
           }
         }

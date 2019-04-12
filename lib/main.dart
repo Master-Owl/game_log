@@ -5,7 +5,7 @@ import 'package:game_log/data/user.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/logs/edit-log-page/edit-log-page.dart';
 import 'package:game_log/screens/games/edit-game-page.dart';
-import 'package:game_log/screens/other/edit-player-page.dart';
+import 'package:game_log/screens/players/edit-player-page.dart';
 import 'package:game_log/screens/logs/view-log-page.dart';
 import 'package:game_log/widgets/slide-transition.dart';
 import 'package:game_log/data/gameplay.dart';
@@ -17,6 +17,8 @@ import 'package:game_log/screens/auth/auth.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_log/screens/other/splashscreen.dart';
 import 'package:game_log/screens/auth/signup-page.dart';
+import 'package:game_log/screens/players/players-page.dart';
+
 
 void main() => runApp(new MyApp());
 
@@ -81,8 +83,9 @@ class MyApp extends StatelessWidget {
           case '/home': return MaterialPageRoute(builder: (context) => MainAppRoutes());
           case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
           case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
-          case '/edit-player-page': return MaterialPageRoute<Player>(builder: (context) => EditPlayerPage(player: args['player']));
+          case '/edit-player-page': return SlideRouteTransition<Player>(direction: SlideDirection.Left, widget: EditPlayerPage(player: args['player']));
           case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
+          case '/players-page': return SlideRouteTransition(direction: SlideDirection.Left, widget: PlayersPage());
           case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());
         }
       },

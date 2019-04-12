@@ -12,14 +12,14 @@ class SettingsPage extends StatelessWidget{
           title: Text('Settings', style: Theme.of(context).textTheme.title),
         ),
         body: Container(
-            padding: EdgeInsets.only(top: 16.0),
+            padding: EdgeInsets.only(top:lrPadding),
             child: ListView(
               itemExtent: 50.0,
               shrinkWrap: true,
               children: [
                 ListTile(
                   contentPadding: EdgeInsets.only(left: lrPadding*1.5),
-                  onTap: () => {},
+                  onTap: () => Navigator.pushNamed(context, '/players-page'),
                   title: Text('Manage Players'),
                   leading: Icon(Icons.people_outline),                  
                 ),

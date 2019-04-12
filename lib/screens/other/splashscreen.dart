@@ -1,4 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+
+const int splashScreenDuration = 1500;
 
 class SplashScreen extends StatefulWidget {
   SplashScreen({Key key, this.animate: true}) : super(key: key);
@@ -12,22 +15,30 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   AnimationController _controller; 
   bool animate;
+  int time;
+  int pause;
 
   @override
   void initState() {
     super.initState();
 
+    pause = 100;
+    time = (splashScreenDuration/2).round() - (pause/2).round();
     _controller = AnimationController(
       vsync: this,
       value: 0,
-      duration: Duration(milliseconds: 1000),      
+      duration: Duration(milliseconds: time),      
     );
   }
 
   @override
   Widget build(BuildContext context) {
     double maxHeight = MediaQuery.of(context).size.height;
-    _controller.forward();
+    _controller.forward().then((x) =>
+      Future.delayed(Duration(milliseconds: pause)).then((x) =>
+        _controller.animateBack(0, curve: Curves.easeIn)
+      )
+    );
     return Container(
         constraints: BoxConstraints(maxHeight: maxHeight),
         color: Colors.white,

@@ -184,8 +184,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return cards;
   }
 
-  void delayAnimations(
-      List<AnimationController> controllers, Duration offset) async {
+  void delayAnimations(List<AnimationController> controllers, Duration offset) async {
     for (AnimationController ctrl in controllers) {
       ctrl.forward();
       await Future.delayed(offset);

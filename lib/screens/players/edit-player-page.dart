@@ -37,7 +37,6 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
     }
 
     appBarTitle = newPlayer ? 'Create New Player' : 'Edit Player';
-    color = Colors.grey;
     super.initState();
   }
 
@@ -54,8 +53,12 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
                   player.name = name == '' ? 'Anonymous' : name;
                   player.color = color;
                   // TODO: find a way to handle anonymous player entries in db
-                  if (player.name != 'Anonymous')
+                  if (player.name != 'Anonymous') {
+                    int pIdx = globalPlayerList.indexOf(player);
                     player = await updatePlayerDB(player);
+                    globalPlayerList.removeAt(pIdx);
+                    globalPlayerList.add(player);
+                  }
 
                   Navigator.pop(context, player);
                 })
