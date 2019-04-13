@@ -27,10 +27,11 @@ class _LogsPageState extends State<LogsPage>
 
   @override
   void initState() {
+    super.initState();
     sortBy = SortBy.alphabetical;
     sortTypes = [];
-    fetched = false;
     gameplays = globalGameplayList;
+    fetched = gameplays.length > 0;
     for (SortBy type in SortBy.values) {
       sortTypes
           .add(DropdownMenuItem(child: Text(sortByString(type)), value: type));
@@ -43,7 +44,6 @@ class _LogsPageState extends State<LogsPage>
           .collection('gameplays')
           .getDocuments()
           .then(fetchGameplayData);
-    super.initState();
   }
 
   @override

@@ -28,7 +28,7 @@ class _GamesPageState extends State<GamesPage>
     sortBy = SortGamesBy.alphabetical_ascending;
     sortTypes = [];
     games = globalGameList;
-    fetched = false;
+    fetched = games.length > 0;
     for (SortGamesBy type in SortGamesBy.values) {
       sortTypes
           .add(DropdownMenuItem(child: Text(sortByString(type)), value: type));
@@ -50,7 +50,7 @@ class _GamesPageState extends State<GamesPage>
       position: slideAnimation(animController, SlideDirection.Right),
       child: Scaffold(
         body: Container(
-            padding: const EdgeInsets.only(top: headerPaddingTop),
+            padding: EdgeInsets.only(top: headerPaddingTop),
             child: Column(
               children: [
                 Padding(
@@ -161,8 +161,7 @@ class _GamesPageState extends State<GamesPage>
   void fetchGameData(QuerySnapshot snapshot) {
     games.clear();
     globalGameList.clear();
-
-    // List<Future>
+    print('here');
     for (DocumentSnapshot gameRef in snapshot.documents) {
       String name = gameRef.data['name'];
       GameType type = gameTypeFromString(gameRef.data['type']);

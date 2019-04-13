@@ -73,6 +73,7 @@ class _ViewLogState extends State<ViewLogPage>
 
     animController.forward();
 
+    double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         body: SingleChildScrollView(
           child: Container(
@@ -87,7 +88,7 @@ class _ViewLogState extends State<ViewLogPage>
                         Expanded(
                             child: Align(
                               alignment: Alignment.centerLeft,
-                              child: IconButton(
+                              child: IconButton(                                
                                 icon: Icon(
                                   Icons.arrow_back,
                                   color: headline.color,
@@ -99,8 +100,9 @@ class _ViewLogState extends State<ViewLogPage>
                             ),
                             flex: 2),
                         Spacer(flex: 1),
-                        Center(
-                          child: AutoSizeText(gameplay.game.name, style: headline, maxLines: 2),
+                        Container(
+                          width: screenWidth-(screenWidth/2.5),
+                          child: AutoSizeText(gameplay.game.name, style: headline, maxLines: 2, textAlign: TextAlign.center),
                         ),
                         Spacer(flex: 3)
                       ]),
