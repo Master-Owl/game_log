@@ -161,7 +161,7 @@ class _GamesPageState extends State<GamesPage>
   void fetchGameData(QuerySnapshot snapshot) {
     games.clear();
     globalGameList.clear();
-    print('here');
+
     for (DocumentSnapshot gameRef in snapshot.documents) {
       String name = gameRef.data['name'];
       GameType type = gameTypeFromString(gameRef.data['type']);

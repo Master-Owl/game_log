@@ -24,6 +24,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
   Widget waitingScreen;
   Widget loginScreen;
   Widget signupScreen;
+  bool hasNavigated;
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
       authStateController.add(user == null ? 1 : 3);
       if (user != null) CurrentUser.setUser(user);
     });
+    hasNavigated = false;
   }
 
   @override
@@ -47,7 +49,12 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
             case 2: return signupScreen;
             default:
               Future.delayed(Duration(milliseconds: splashScreenDuration + 100)).then(
-                (x) => Navigator.pushReplacementNamed(context, '/home')
+                (x) { 
+                  if (!hasNavigated) {
+                    hasNavigated = true;
+                    Navigator.pushReplacementNamed(context, '/home'); 
+                  }
+                }
               );              
               return waitingScreen;
           }
@@ -55,32 +62,5 @@ class _AuthenticationWidgetState extends State<AuthenticationWidget> {
         return waitingScreen;
       },
     );
-  }
-}
-
-Future<dynamic> tryLogin(String email, String password) async {
-  try {
-    FirebaseUser user = await FirebaseAuth.instance.signInWithEmailAndPassword(
-      email: email,
-      password: password
-    );
-    return user;
-  } catch (err) {    
-    // https://docs.google.com/spreadsheets/d/1FDn0rRRYjgXMwc_FIAxO7_cQh69q5VXgQt7Hmvyb1Sg/edit#gid=0
-    print('LOGIN ERROR: ' + err.message);
-    return err;
-  }
-}
-
-Future<dynamic> trySignup(String email, String password) async {
-  try {
-    FirebaseUser user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: email, 
-      password: password
-    );
-    return user;
-  } catch (err) {
-    print('SIGNUP ERROR: ' + err.message);
-    return err;
   }
 }

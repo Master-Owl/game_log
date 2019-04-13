@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
@@ -283,4 +284,17 @@ class _SignupPageState extends State<SignupPage> with TickerProviderStateMixin {
     animController.dispose();
     super.dispose();
   }
+
+  Future<dynamic> trySignup(String email, String password) async {
+  try {
+    FirebaseUser user = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: email, 
+      password: password
+    );
+    return user;
+  } catch (err) {
+    print('SIGNUP ERROR: ' + err.message);
+    return err;
+  }
+}
 }

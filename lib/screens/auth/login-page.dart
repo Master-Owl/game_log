@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:game_log/data/globals.dart';
 import 'package:game_log/screens/auth/auth.dart';
@@ -219,4 +220,20 @@ class LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     animController.dispose();
     super.dispose();
   }
+
+  Future<dynamic> tryLogin(String email, String password) async {
+  try {
+    FirebaseUser user = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: email,
+      password: password
+    );
+    return user;
+  } catch (err) {    
+    // https://docs.google.com/spreadsheets/d/1FDn0rRRYjgXMwc_FIAxO7_cQh69q5VXgQt7Hmvyb1Sg/edit#gid=0
+    print('LOGIN ERROR: ' + err.message);
+    return err;
+  }
+}
+
+
 }
