@@ -393,6 +393,21 @@ class _PlayerListState extends State<PlayerList> {
         )
       );
     }
+
+    // options.add(SimpleDialogOption(
+    //   child: Row(
+    //     children: [
+    //       Icon(Icons.person_outline, color: defaultBlack),
+    //       Padding(
+    //         padding: EdgeInsets.only(left: 16.0),
+    //         child: Text('Add Anonymous Player')
+    //       )
+    //     ]
+    //   ),
+    //   onPressed: () async {
+    //     Navigator.pop(context, Player(name: 'Anonymous', color: defaultGray));
+    //   },
+    // ));
     
     options.add(
       SimpleDialogOption(

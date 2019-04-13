@@ -5,37 +5,41 @@ import 'package:game_log/data/globals.dart';
 import 'package:game_log/widgets/app-text-field.dart';
 import 'package:flutter_colorpicker/block_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:game_log/utils/helper-funcs.dart';
 import 'package:game_log/data/user.dart';
 
 class EditPlayerPage extends StatefulWidget {
-  EditPlayerPage({Key key, this.player}) : super(key: key);
+  EditPlayerPage({Key key, this.player, this.isUser = false}) : super(key: key);
 
   final Player player;
+  final bool isUser;
 
-  _EditPlayerPageState createState() => _EditPlayerPageState(player);
+  _EditPlayerPageState createState() => _EditPlayerPageState(player, isUser);
 }
 
 class _EditPlayerPageState extends State<EditPlayerPage> {
-  _EditPlayerPageState(this.player);
+  _EditPlayerPageState(this.player, this.isUser);
 
   Player player;
   String name = '';
   Color color;
+  bool isUser;
   bool newPlayer;
   String appBarTitle;
 
   @override
   void initState() {
     newPlayer = player == null;
+    if (isUser == null) isUser = false;
     
     if (newPlayer) {
       player = Player(name: 'Anonymous', color: Colors.black12); 
-    } else {
-      name = player.name == null ? '' : player.name;
-      color = player.color == null ? Colors.black : player.color;
     }
-
+    
+    name = player.name == null ? '' : player.name;
+    color = player.color == null ? defaultGray : player.color;
+    
     appBarTitle = newPlayer ? 'Create New Player' : 'Edit Player';
     super.initState();
   }
@@ -53,11 +57,22 @@ class _EditPlayerPageState extends State<EditPlayerPage> {
                   player.name = name == '' ? 'Anonymous' : name;
                   player.color = color;
                   // TODO: find a way to handle anonymous player entries in db
-                  if (player.name != 'Anonymous') {
+                  if (player.name != 'Anonymous' && !isUser) {
                     int pIdx = globalPlayerList.indexOf(player);
                     player = await updatePlayerDB(player);
                     globalPlayerList.removeAt(pIdx);
                     globalPlayerList.add(player);
+                  } else if (isUser) {
+                    await CurrentUser.ref.updateData({
+                      'name': player.name,
+                      'color': player.color.value
+                    });
+
+                    UserUpdateInfo uui = UserUpdateInfo();
+                    uui.displayName = player.name;                    
+                    CurrentUser.auth.updateProfile(uui);
+
+                    globalPlayerList[0] = player;
                   }
 
                   Navigator.pop(context, player);

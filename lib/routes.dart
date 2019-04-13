@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:game_log/screens/other/home-page.dart';
 import 'package:game_log/screens/logs/logs-page.dart';
 import 'package:game_log/screens/games/games-page.dart';
-import 'package:game_log/data/gameplay.dart';
 import 'package:game_log/data/globals.dart';
-import 'package:game_log/data/player.dart';
-import 'package:game_log/data/game.dart';
-import 'package:game_log/data/user.dart';
 
 class MainAppRoutes extends StatefulWidget {
   MainAppRoutes({Key key}) : super(key: key);
@@ -35,7 +31,6 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
 
     _tabIdx = 1;
     _currentPage = _mainPages[_tabIdx];
-    _getAllPlayers();
     super.initState();
   }
 
@@ -69,24 +64,5 @@ class _MainAppRoutesState extends State<MainAppRoutes> {
 
   void _updateTab(int idx) {
     tabIdxController.sink.add(idx);
-  }
-
-  void _getAllPlayers() {
-    if (CurrentUser.ref != null) {
-      CurrentUser.ref
-        .collection('players')
-        .getDocuments()
-        .then((snapshot) {
-          List<Player> dbPlayers = [];
-          snapshot.documents.forEach((doc) {
-            dbPlayers.add(Player(
-              name: doc.data['name'],
-              color: Color(doc.data['color']),
-              dbRef: doc.reference
-            ));
-          });
-          globalPlayerList = dbPlayers;
-        });
-    }
   }
 }

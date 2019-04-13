@@ -83,7 +83,7 @@ class MyApp extends StatelessWidget {
           case '/home': return MaterialPageRoute(builder: (context) => MainAppRoutes());
           case '/edit-log-page': return MaterialPageRoute<GamePlay>(builder: (context) => EditLogPage(gameplay: args['gameplay']));
           case '/edit-game-page': return MaterialPageRoute<Game>(builder: (context) => EditGamePage(game: args['game']));
-          case '/edit-player-page': return SlideRouteTransition<Player>(direction: SlideDirection.Left, widget: EditPlayerPage(player: args['player']));
+          case '/edit-player-page': return SlideRouteTransition<Player>(direction: SlideDirection.Left, widget: EditPlayerPage(player: args['player'], isUser: args['isUser'],));
           case '/view-log-page': return SlideRouteTransition<GamePlay>(direction: SlideDirection.Left, widget: ViewLogPage(gameplay: args['gameplay']));
           case '/players-page': return SlideRouteTransition(direction: SlideDirection.Left, widget: PlayersPage());
           case '/settings-page': return MaterialPageRoute(builder: (context) => SettingsPage());

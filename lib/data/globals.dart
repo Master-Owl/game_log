@@ -39,9 +39,10 @@ Animation<Offset> slideAnimation(AnimationController animController, SlideDirect
     end: Offset.zero).animate(CurvedAnimation(curve: Curves.ease, parent: animController));
 }
 
+/// The current user will always be at position 0 in this list
+List<Player> globalPlayerList = [];
 List<Game> globalGameList = [];
 List<GamePlay> globalGameplayList = [];
-List<Player> globalPlayerList = [];
 
 Future<List<Player>> getPlayersFromRefs(List<DocumentReference> pRefs) async {
   List<Player> players = [];

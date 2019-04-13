@@ -73,7 +73,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _addPlayer() {
     Navigator.pushNamed(context, '/edit-player-page',
-        arguments: {'player': null});
+        arguments: {'player': null, 'isUser': false});
   }
 
   void _goToSettings() {

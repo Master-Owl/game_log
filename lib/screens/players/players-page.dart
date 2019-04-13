@@ -15,11 +15,6 @@ class _PlayersPageState extends State<PlayersPage> {
   @override
   void initState() {
     super.initState();
-    if (globalPlayerList.length == 0) {
-      globalPlayerList.add(Player(color: Colors.lightBlue,
-        dbRef: CurrentUser.ref, 
-        name: CurrentUser.auth.displayName));
-    }
     players = globalPlayerList;
   }
 
@@ -45,6 +40,7 @@ class _PlayersPageState extends State<PlayersPage> {
     List<Widget> tiles = [];
 
     for (Player p in players) {
+      if (p.dbRef == CurrentUser.ref) continue;
       tiles.add(ListTile(
         contentPadding: EdgeInsets.only(left:lrPadding*1.5),
         leading: Icon(Icons.person, color: p.color),
