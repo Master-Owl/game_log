@@ -18,6 +18,8 @@ class EditPlayerPage extends StatefulWidget {
   _EditPlayerPageState createState() => _EditPlayerPageState(player, isUser);
 }
 
+// TODO: Fix the saving of new players here
+
 class _EditPlayerPageState extends State<EditPlayerPage> {
   _EditPlayerPageState(this.player, this.isUser);
 

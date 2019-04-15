@@ -13,6 +13,8 @@ class GamesPage extends StatefulWidget {
   _GamesPageState createState() => _GamesPageState();
 }
 
+// TODO: Fix the game list to be up to date with db
+
 class _GamesPageState extends State<GamesPage>
     with SingleTickerProviderStateMixin {
   _GamesPageState();

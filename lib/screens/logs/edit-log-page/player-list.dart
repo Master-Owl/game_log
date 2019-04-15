@@ -394,6 +394,7 @@ class _PlayerListState extends State<PlayerList> {
       );
     }
 
+    // TODO: Figure out how anonymous players will work
     // options.add(SimpleDialogOption(
     //   child: Row(
     //     children: [
